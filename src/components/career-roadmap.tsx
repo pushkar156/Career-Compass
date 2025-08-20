@@ -25,7 +25,6 @@ import {
   FileText,
   GraduationCap,
   ListTree,
-  ChevronRight,
 } from 'lucide-react';
 
 interface CareerRoadmapProps {
@@ -42,7 +41,13 @@ type Resource = CareerPathOutput['resources'][0];
 
 export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) {
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
-  const knowledgeAreas = useMemo(() => data.knowledgeAreas || [], [data.knowledgeAreas]);
+  
+  const allKnowledgeAreas = useMemo(() => {
+    const beginner = data.knowledgeAreas?.beginnerToIntermediate || [];
+    const intermediate = data.knowledgeAreas?.intermediateToPro || [];
+    const advanced = data.knowledgeAreas?.proToAdvanced || [];
+    return [...beginner, ...intermediate, ...advanced];
+  }, [data.knowledgeAreas]);
 
   const handleTaskToggle = (task: string) => {
     setCompletedTasks((prev) =>
@@ -50,7 +55,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
     );
   };
 
-  const progress = knowledgeAreas.length > 0 ? (completedTasks.length / knowledgeAreas.length) * 100 : 0;
+  const progress = allKnowledgeAreas.length > 0 ? (completedTasks.length / allKnowledgeAreas.length) * 100 : 0;
   
   const getIconForResource = (resource: Resource) => {
     switch (resource.type) {
@@ -68,6 +73,22 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
         return <BookOpen className="h-4 w-4 text-primary mr-3 shrink-0" />;
     }
   };
+
+  const renderKnowledgeAreaCheckbox = (area: string, index: number) => (
+    <div key={index} className="flex items-center space-x-3 bg-slate-50 p-3 rounded-md">
+      <Checkbox
+        id={`task-${area}-${index}`}
+        checked={completedTasks.includes(area)}
+        onCheckedChange={() => handleTaskToggle(area)}
+      />
+      <label
+        htmlFor={`task-${area}-${index}`}
+        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1"
+      >
+        {area}
+      </label>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
@@ -123,7 +144,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
               <CardHeader>
                 <CardTitle className="font-headline">Progress Tracker</CardTitle>
                 <CardDescription>
-                  {completedTasks.length} of {knowledgeAreas.length} knowledge areas acquired
+                  {completedTasks.length} of {allKnowledgeAreas.length} knowledge areas acquired
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -193,21 +214,26 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                     <CardDescription>Check off these areas as you master them.</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {knowledgeAreas.map((area, index) => (
-                      <div key={index} className="flex items-center space-x-3 bg-slate-50 p-3 rounded-md">
-                        <Checkbox
-                          id={`task-${index}`}
-                          checked={completedTasks.includes(area)}
-                          onCheckedChange={() => handleTaskToggle(area)}
-                        />
-                        <label
-                          htmlFor={`task-${index}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1"
-                        >
-                          {area}
-                        </label>
-                      </div>
-                    ))}
+                    <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
+                      <AccordionItem value="item-1">
+                        <AccordionTrigger className="font-bold text-lg">Beginner to Intermediate</AccordionTrigger>
+                        <AccordionContent className="space-y-3">
+                          {data.knowledgeAreas?.beginnerToIntermediate?.map(renderKnowledgeAreaCheckbox)}
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="item-2">
+                        <AccordionTrigger className="font-bold text-lg">Intermediate to Pro</AccordionTrigger>
+                        <AccordionContent className="space-y-3">
+                          {data.knowledgeAreas?.intermediateToPro?.map(renderKnowledgeAreaCheckbox)}
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="item-3">
+                        <AccordionTrigger className="font-bold text-lg">Pro to Advanced</AccordionTrigger>
+                        <AccordionContent className="space-y-3">
+                          {data.knowledgeAreas?.proToAdvanced?.map(renderKnowledgeAreaCheckbox)}
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                   </CardContent>
                 </Card>
               </TabsContent>

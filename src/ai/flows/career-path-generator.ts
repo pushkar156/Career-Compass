@@ -20,7 +20,7 @@ export type CareerPathInput = z.infer<typeof CareerPathInputSchema>;
 
 const ResourceSchema = z.object({
   title: z.string().describe('The title of the resource.'),
-  url: z.string().url().describe('The URL for the resource.'),
+  url: z.string().url().describe('A valid and working URL for the resource.'),
   type: z.enum(['video', 'course', 'book', 'article', 'website']).describe('The type of the resource.'),
 });
 
@@ -32,9 +32,9 @@ const RoadmapSchema = z.object({
 
 const CareerPathOutputSchema = z.object({
   roadmap: RoadmapSchema.describe('A personalized learning roadmap segmented by skill level.'),
-  knowledgeAreas: z.array(z.string()).describe('List of required knowledge areas.'),
-  resources: z.array(ResourceSchema).describe('List of relevant resources (e.g., YouTube videos, online courses).'),
-  tools: z.array(z.string()).describe('List of the required tools for the field.'),
+  knowledgeAreas: RoadmapSchema.describe('List of required knowledge areas, segmented by skill level.'),
+  resources: z.array(ResourceSchema).describe('List of relevant, high-quality resources.'),
+  tools: z.array(z.string()).describe('List of the essential tools for the field.'),
 });
 export type CareerPathOutput = z.infer<typeof CareerPathOutputSchema>;
 
@@ -46,13 +46,31 @@ const careerPathPrompt = ai.definePrompt({
   name: 'careerPathPrompt',
   input: {schema: CareerPathInputSchema},
   output: {schema: CareerPathOutputSchema},
-  prompt: `You are an AI career counselor. Generate a personalized learning roadmap, a list of required knowledge areas, a list of relevant resources, and required tools for the career: {{{career}}}. 
-  
-  For the roadmap, provide a step-by-step guide segmented into three levels: 'beginnerToIntermediate', 'intermediateToPro', and 'proToAdvanced'. Each segment should be a list of strings.
-  For resources, provide a title, a valid URL, and the type of resource.
-  For tools, provide a simple list of names.
-  
-  Return the response in JSON format.`,
+  prompt: `You are an expert AI career counselor. Your goal is to provide a comprehensive, high-quality, and actionable guide for a user aspiring to enter the field of: {{{career}}}.
+
+Your response must be structured and detailed, following these strict guidelines:
+
+1.  **Roadmap (roadmap):**
+    *   Create a step-by-step learning roadmap.
+    *   Organize the roadmap into three distinct sections: 'beginnerToIntermediate', 'intermediateToPro', and 'proToAdvanced'.
+    *   Each step should be a clear, concise action item.
+
+2.  **Knowledge Areas (knowledgeAreas):**
+    *   Identify the key knowledge areas required for this career.
+    *   Structure these areas into the same three sections as the roadmap: 'beginnerToIntermediate', 'intermediateToPro', and 'proToAdvanced'.
+    *   This should outline the concepts and skills to master at each level.
+
+3.  **Resources (resources):**
+    *   Provide a curated list of the **best available resources**. Quality over quantity.
+    *   **For websites and articles:** Prioritize authoritative sources. For technical fields, this includes sites like MDN Web Docs, GeeksforGeeks, W3Schools, official documentation, and top-tier blogs.
+    *   **For YouTube videos:** Find highly-rated, popular videos from reputable creators. If possible and relevant, include options in both **English and Hindi**.
+    *   **CRITICAL:** Every single URL must be a valid, working, direct link to the resource. Do not provide links to search queries.
+    *   For each resource, specify its title, URL, and type ('video', 'course', 'book', 'article', 'website').
+
+4.  **Tools (tools):**
+    *   List the most essential, industry-standard software and tools for this career. Be specific (e.g., instead of 'a code editor', suggest 'VS Code').
+
+Return the entire response in a single, valid JSON object that adheres to the defined output schema.`,
 });
 
 const careerPathFlow = ai.defineFlow(
