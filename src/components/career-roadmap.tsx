@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import {
   ArrowLeft,
   User,
@@ -24,6 +25,7 @@ import {
   FileText,
   GraduationCap,
   ListTree,
+  ChevronRight,
 } from 'lucide-react';
 
 interface CareerRoadmapProps {
@@ -66,10 +68,6 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
         return <BookOpen className="h-4 w-4 text-primary mr-3 shrink-0" />;
     }
   };
-  
-  const roadmapSteps = useMemo(() => {
-    return data.roadmap.split(/\n\s*\d+\.\s*/).filter(n => n.length > 0);
-  }, [data.roadmap]);
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
@@ -152,11 +150,38 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                     <CardDescription>Follow these steps to achieve your career goals. This is your journey!</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                     <ol className="list-decimal list-inside space-y-3">
-                      {roadmapSteps.map((step, index) => (
-                        <li key={index} className="bg-slate-50 p-3 rounded-md">{step}</li>
-                      ))}
-                    </ol>
+                    <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
+                      <AccordionItem value="item-1">
+                        <AccordionTrigger className="font-bold text-lg">Beginner to Intermediate</AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="list-disc list-inside space-y-2 pl-4">
+                            {data.roadmap?.beginnerToIntermediate?.map((step, index) => (
+                              <li key={index}>{step}</li>
+                            ))}
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="item-2">
+                        <AccordionTrigger className="font-bold text-lg">Intermediate to Pro</AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="list-disc list-inside space-y-2 pl-4">
+                            {data.roadmap?.intermediateToPro?.map((step, index) => (
+                              <li key={index}>{step}</li>
+                            ))}
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="item-3">
+                        <AccordionTrigger className="font-bold text-lg">Pro to Advanced</AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="list-disc list-inside space-y-2 pl-4">
+                            {data.roadmap?.proToAdvanced?.map((step, index) => (
+                              <li key={index}>{step}</li>
+                            ))}
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                   </CardContent>
                 </Card>
               </TabsContent>

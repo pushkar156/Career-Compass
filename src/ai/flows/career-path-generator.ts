@@ -24,8 +24,14 @@ const ResourceSchema = z.object({
   type: z.enum(['video', 'course', 'book', 'article', 'website']).describe('The type of the resource.'),
 });
 
+const RoadmapSchema = z.object({
+  beginnerToIntermediate: z.array(z.string()).describe('A list of steps for the beginner to intermediate level.'),
+  intermediateToPro: z.array(z.string()).describe('A list of steps for the intermediate to pro level.'),
+  proToAdvanced: z.array(z.string()).describe('A list of steps for the pro to advanced level.'),
+});
+
 const CareerPathOutputSchema = z.object({
-  roadmap: z.string().describe('A personalized learning roadmap for the specified career. Use markdown for numbered lists.'),
+  roadmap: RoadmapSchema.describe('A personalized learning roadmap segmented by skill level.'),
   knowledgeAreas: z.array(z.string()).describe('List of required knowledge areas.'),
   resources: z.array(ResourceSchema).describe('List of relevant resources (e.g., YouTube videos, online courses).'),
   tools: z.array(z.string()).describe('List of the required tools for the field.'),
@@ -42,7 +48,7 @@ const careerPathPrompt = ai.definePrompt({
   output: {schema: CareerPathOutputSchema},
   prompt: `You are an AI career counselor. Generate a personalized learning roadmap, a list of required knowledge areas, a list of relevant resources, and required tools for the career: {{{career}}}. 
   
-  For the roadmap, provide a step-by-step guide.
+  For the roadmap, provide a step-by-step guide segmented into three levels: 'beginnerToIntermediate', 'intermediateToPro', and 'proToAdvanced'. Each segment should be a list of strings.
   For resources, provide a title, a valid URL, and the type of resource.
   For tools, provide a simple list of names.
   
