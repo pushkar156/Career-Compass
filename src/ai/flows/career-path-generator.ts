@@ -1,3 +1,4 @@
+
 // src/ai/flows/career-path-generator.ts
 'use server';
 
@@ -17,10 +18,16 @@ const CareerPathInputSchema = z.object({
 });
 export type CareerPathInput = z.infer<typeof CareerPathInputSchema>;
 
+const ResourceSchema = z.object({
+  title: z.string().describe('The title of the resource.'),
+  url: z.string().url().describe('The URL for the resource.'),
+  type: z.enum(['video', 'course', 'book', 'article', 'website']).describe('The type of the resource.'),
+});
+
 const CareerPathOutputSchema = z.object({
-  roadmap: z.string().describe('A personalized learning roadmap for the specified career.'),
+  roadmap: z.string().describe('A personalized learning roadmap for the specified career. Use markdown for numbered lists.'),
   knowledgeAreas: z.array(z.string()).describe('List of required knowledge areas.'),
-  resources: z.array(z.string()).describe('List of relevant resources (e.g., YouTube videos, online courses).'),
+  resources: z.array(ResourceSchema).describe('List of relevant resources (e.g., YouTube videos, online courses).'),
   tools: z.array(z.string()).describe('List of the required tools for the field.'),
 });
 export type CareerPathOutput = z.infer<typeof CareerPathOutputSchema>;
@@ -33,7 +40,13 @@ const careerPathPrompt = ai.definePrompt({
   name: 'careerPathPrompt',
   input: {schema: CareerPathInputSchema},
   output: {schema: CareerPathOutputSchema},
-  prompt: `You are an AI career counselor. Generate a personalized learning roadmap, a list of required knowledge areas, a list of relevant resources, and required tools for the career: {{{career}}}. Return the response in JSON format.`, 
+  prompt: `You are an AI career counselor. Generate a personalized learning roadmap, a list of required knowledge areas, a list of relevant resources, and required tools for the career: {{{career}}}. 
+  
+  For the roadmap, provide a step-by-step guide.
+  For resources, provide a title, a valid URL, and the type of resource.
+  For tools, provide a simple list of names.
+  
+  Return the response in JSON format.`,
 });
 
 const careerPathFlow = ai.defineFlow(

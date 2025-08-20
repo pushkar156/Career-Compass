@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -18,6 +19,11 @@ import {
   Wrench,
   Youtube,
   Award,
+  Book,
+  Globe,
+  FileText,
+  GraduationCap,
+  ListTree,
 } from 'lucide-react';
 
 interface CareerRoadmapProps {
@@ -30,6 +36,8 @@ interface CareerRoadmapProps {
   onReset: () => void;
 }
 
+type Resource = CareerPathOutput['resources'][0];
+
 export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) {
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   const knowledgeAreas = useMemo(() => data.knowledgeAreas || [], [data.knowledgeAreas]);
@@ -41,13 +49,27 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
   };
 
   const progress = knowledgeAreas.length > 0 ? (completedTasks.length / knowledgeAreas.length) * 100 : 0;
-
-  const getIconForResource = (resource: string) => {
-    if (resource.toLowerCase().includes('youtube.com')) {
-      return <Youtube className="h-4 w-4 text-red-500 mr-2 shrink-0" />;
+  
+  const getIconForResource = (resource: Resource) => {
+    switch (resource.type) {
+      case 'video':
+        return <Youtube className="h-4 w-4 text-red-500 mr-3 shrink-0" />;
+      case 'course':
+        return <GraduationCap className="h-4 w-4 text-primary mr-3 shrink-0" />;
+      case 'book':
+        return <Book className="h-4 w-4 text-primary mr-3 shrink-0" />;
+      case 'article':
+        return <FileText className="h-4 w-4 text-primary mr-3 shrink-0" />;
+      case 'website':
+        return <Globe className="h-4 w-4 text-primary mr-3 shrink-0" />;
+      default:
+        return <BookOpen className="h-4 w-4 text-primary mr-3 shrink-0" />;
     }
-    return <BookOpen className="h-4 w-4 text-primary mr-2 shrink-0" />;
   };
+  
+  const roadmapSteps = useMemo(() => {
+    return data.roadmap.split(/\n\s*\d+\.\s*/).filter(n => n.length > 0);
+  }, [data.roadmap]);
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
@@ -103,7 +125,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
               <CardHeader>
                 <CardTitle className="font-headline">Progress Tracker</CardTitle>
                 <CardDescription>
-                  {completedTasks.length} of {knowledgeAreas.length} steps completed
+                  {completedTasks.length} of {knowledgeAreas.length} knowledge areas acquired
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -115,38 +137,52 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
 
           {/* Right Column */}
           <main className="lg:col-span-2">
-            <Tabs defaultValue="roadmap" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="roadmap"><Goal className="mr-2 h-4 w-4" />Roadmap</TabsTrigger>
+            <Tabs defaultValue="learning-path" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="learning-path"><Goal className="mr-2 h-4 w-4" />Learning Path</TabsTrigger>
+                <TabsTrigger value="knowledge-areas"><ListTree className="mr-2 h-4 w-4" />Knowledge Areas</TabsTrigger>
                 <TabsTrigger value="resources"><BookOpen className="mr-2 h-4 w-4" />Resources</TabsTrigger>
                 <TabsTrigger value="tools"><Wrench className="mr-2 h-4 w-4" />Tools</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="roadmap" className="mt-4">
+              <TabsContent value="learning-path" className="mt-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="font-headline">Learning Path</CardTitle>
-                    <CardDescription>{data.roadmap}</CardDescription>
+                    <CardTitle className="font-headline">Your Step-by-Step Roadmap</CardTitle>
+                    <CardDescription>Follow these steps to achieve your career goals. This is your journey!</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <h3 className="font-bold font-headline text-lg">Key Knowledge Areas</h3>
-                    <div className="space-y-3">
-                      {knowledgeAreas.map((area, index) => (
-                        <div key={index} className="flex items-center space-x-3 bg-slate-50 p-3 rounded-md">
-                          <Checkbox
-                            id={`task-${index}`}
-                            checked={completedTasks.includes(area)}
-                            onCheckedChange={() => handleTaskToggle(area)}
-                          />
-                          <label
-                            htmlFor={`task-${index}`}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1"
-                          >
-                            {area}
-                          </label>
-                        </div>
+                     <ol className="list-decimal list-inside space-y-3">
+                      {roadmapSteps.map((step, index) => (
+                        <li key={index} className="bg-slate-50 p-3 rounded-md">{step}</li>
                       ))}
-                    </div>
+                    </ol>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="knowledge-areas" className="mt-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-headline">Key Knowledge Areas</CardTitle>
+                    <CardDescription>Check off these areas as you master them.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {knowledgeAreas.map((area, index) => (
+                      <div key={index} className="flex items-center space-x-3 bg-slate-50 p-3 rounded-md">
+                        <Checkbox
+                          id={`task-${index}`}
+                          checked={completedTasks.includes(area)}
+                          onCheckedChange={() => handleTaskToggle(area)}
+                        />
+                        <label
+                          htmlFor={`task-${index}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1"
+                        >
+                          {area}
+                        </label>
+                      </div>
+                    ))}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -160,16 +196,18 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                   <CardContent>
                     <ul className="space-y-3">
                       {(data.resources || []).map((resource, index) => (
-                        <li key={index} className="flex items-start p-3 bg-slate-50 rounded-md">
-                          {getIconForResource(resource)}
-                          <div className="flex-1">
-                            <span className="font-medium text-sm">{resource}</span>
-                            {index === 0 && (
-                               <Badge variant="outline" className="ml-2 border-accent text-accent">
-                                <Award className="mr-1 h-3 w-3" /> Expert Pick
-                              </Badge>
-                            )}
-                          </div>
+                        <li key={index} className="p-3 bg-slate-50 rounded-md transition-all hover:bg-slate-100">
+                           <a href={resource.url} target="_blank" rel="noopener noreferrer" className="flex items-start">
+                            {getIconForResource(resource)}
+                            <div className="flex-1">
+                              <span className="font-medium text-sm">{resource.title}</span>
+                              {index === 0 && (
+                                 <Badge variant="outline" className="ml-2 border-accent text-accent">
+                                  <Award className="mr-1 h-3 w-3" /> Expert Pick
+                                </Badge>
+                              )}
+                            </div>
+                           </a>
                         </li>
                       ))}
                     </ul>
@@ -187,7 +225,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                      <ul className="space-y-3">
                       {(data.tools || []).map((tool, index) => (
                         <li key={index} className="flex items-center p-3 bg-slate-50 rounded-md">
-                          <Wrench className="h-4 w-4 text-primary mr-2" />
+                          <Wrench className="h-4 w-4 text-primary mr-3" />
                           <span className="font-medium text-sm">{tool}</span>
                         </li>
                       ))}
