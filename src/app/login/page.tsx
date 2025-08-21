@@ -12,8 +12,8 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  FirebaseError,
 } from 'firebase/auth';
+import type { FirebaseError } from 'firebase/app';
 import { app } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,8 +51,31 @@ export default function LoginPage() {
 
   const handleAuthError = (error: any) => {
     let description = 'An unexpected error occurred. Please try again.';
-    if (error instanceof FirebaseError) {
-      description = error.message;
+    // Check if it's a Firebase error by looking for the 'code' property
+    if (error && error.code) {
+      const firebaseError = error as FirebaseError;
+      switch (firebaseError.code) {
+        case 'auth/user-not-found':
+          description = 'No user found with this email. Please sign up first.';
+          break;
+        case 'auth/wrong-password':
+          description = 'Incorrect password. Please try again.';
+          break;
+        case 'auth/email-already-in-use':
+          description = 'This email is already registered. Please sign in instead.';
+          break;
+        case 'auth/invalid-email':
+          description = 'The email address is not valid.';
+          break;
+        case 'auth/weak-password':
+          description = 'The password is too weak. Please choose a stronger one.';
+          break;
+        case 'auth/popup-closed-by-user':
+          description = 'Sign-in popup closed before completion. Please try again.';
+          break;
+        default:
+          description = firebaseError.message; // Use the specific firebase error message
+      }
     }
     toast({
       variant: 'destructive',
