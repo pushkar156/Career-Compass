@@ -12,6 +12,7 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  FirebaseError,
 } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
@@ -48,17 +49,25 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
 
+  const handleAuthError = (error: any) => {
+    let description = 'An unexpected error occurred. Please try again.';
+    if (error instanceof FirebaseError) {
+      description = error.message;
+    }
+    toast({
+      variant: 'destructive',
+      title: 'Authentication Error',
+      description,
+    });
+  }
+
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);
       router.push('/');
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Authentication Error',
-        description: error.message,
-      });
+      handleAuthError(error);
     } finally {
       setLoading(false);
     }
@@ -75,11 +84,7 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, data.email, data.password);
       router.push('/');
     } catch (error: any) {
-       toast({
-        variant: 'destructive',
-        title: 'Authentication Error',
-        description: 'Invalid email or password.',
-      });
+       handleAuthError(error);
     } finally {
       setLoading(false);
     }
@@ -91,11 +96,7 @@ export default function LoginPage() {
       await createUserWithEmailAndPassword(auth, data.email, data.password);
       router.push('/');
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Authentication Error',
-        description: error.code === 'auth/email-already-in-use' ? 'This email is already registered.' : error.message,
-      });
+      handleAuthError(error);
     } finally {
       setLoading(false);
     }
