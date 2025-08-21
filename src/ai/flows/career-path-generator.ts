@@ -49,7 +49,7 @@ const careerPathPrompt = ai.definePrompt({
   name: 'careerPathPrompt',
   input: {schema: CareerPathInputSchema},
   output: {schema: CareerPathOutputSchema},
-  prompt: `You are an expert AI career counselor. Your goal is to provide a comprehensive, high-quality, and actionable guide for a user aspiring to enter the field of: {{{career}}}.
+  prompt: `You are an expert AI career counselor and content curator. Your goal is to provide a comprehensive, high-quality, and actionable guide for a user aspiring to enter the field of: {{{career}}}.
 
 Consider the user's background:
 {{#if currentRole}}Current Role: {{{currentRole}}}{{/if}}
@@ -68,16 +68,19 @@ Your response must be structured and detailed, following these strict guidelines
     *   This should outline the concepts and skills to master at each level.
 
 3.  **Resources (resources):**
-    *   Provide a curated list of the **best available resources**. Quality over quantity.
+    *   Provide a curated list of the **best available and most popular resources ("hot" resources that people actually use and recommend)**. Quality and popularity are more important than quantity.
     *   **For websites and articles:** Prioritize authoritative sources like MDN Web Docs, GeeksforGeeks, W3Schools, official documentation, and top-tier blogs. When providing the title, include the domain name in parentheses, e.g., 'Official React Docs (react.dev)'.
-    *   **For online courses:** Include highly-rated courses from platforms like Coursera and Udemy.
-    *   **For YouTube videos:** Find highly-rated, **publicly available SINGLE videos**, not playlists. Do not suggest private or deleted videos. For each topic, provide at least one video in **English** and, if available, one in **Hindi**. For each video, you **must** extract its unique video ID and provide it in the 'videoId' field.
-    *   **CRITICAL:** Every single URL must be a valid, working, direct link to the resource. Do not provide links to search queries or unavailable content.
+    *   **For online courses:** Include highly-rated courses from major platforms like Coursera and Udemy. Ensure the links are direct and valid.
+    *   **For YouTube videos:** This is critical. Find the most helpful, highly-regarded, and popular **publicly available SINGLE videos**.
+        *   **Do not suggest playlists, private videos, deleted videos, or members-only content.** Every video must be currently accessible to the public.
+        *   **Act as if you have verified this:** Pretend you have checked each video for high view counts, a good like/dislike ratio, and positive user comments. Your selections should reflect this quality check.
+        *   For each major topic, you **must** provide at least one top-tier video in **English** and, if a high-quality equivalent exists, one in **Hindi**. The search for Hindi content should be based on the language of the video, not just the word "Hindi" in the title.
+        *   For every YouTube video, you **must** extract its unique video ID and provide it in the 'videoId' field.
 
 4.  **Tools (tools):**
     *   List the most essential, industry-standard software and tools for this career. Be specific (e.g., instead of 'a code editor', suggest 'VS Code').
 
-Return the entire response in a single, valid JSON object that adheres to the defined output schema.`,
+Return the entire response in a single, valid JSON object that adheres to the defined output schema. Every single URL must be a valid, working, direct link to the resource.`,
 });
 
 const careerPathFlow = ai.defineFlow(
