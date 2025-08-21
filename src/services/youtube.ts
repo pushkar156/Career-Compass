@@ -28,7 +28,7 @@ const YoutubeSearchOutputSchema = z.array(VideoResourceSchema);
 export const findYoutubeVideosTool = ai.defineTool(
     {
         name: 'findYoutubeVideosTool',
-        description: 'Searches YouTube for relevant videos based on a query.',
+        description: 'Searches YouTube for relevant, popular, and embeddable videos based on a query.',
         inputSchema: YoutubeSearchInputSchema,
         outputSchema: YoutubeSearchOutputSchema,
     },
@@ -48,7 +48,10 @@ export const findYoutubeVideosTool = ai.defineTool(
         searchUrl.searchParams.set('maxResults', limit.toString());
         searchUrl.searchParams.set('key', apiKey);
         searchUrl.searchParams.set('relevanceLanguage', lang);
+        // Ensure videos are embeddable to allow previews.
         searchUrl.searchParams.set('videoEmbeddable', 'true');
+        // Order by view count to get the most popular videos.
+        searchUrl.searchParams.set('order', 'viewCount');
 
         try {
             const response = await fetch(searchUrl.toString());
