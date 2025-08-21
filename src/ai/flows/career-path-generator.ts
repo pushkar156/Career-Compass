@@ -12,6 +12,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {findYoutubeVideosTool} from '@/services/youtube';
 
 const CareerPathInputSchema = z.object({
   career: z.string().describe('The career or field of study the user is interested in.'),
@@ -49,6 +50,7 @@ const careerPathPrompt = ai.definePrompt({
   name: 'careerPathPrompt',
   input: {schema: CareerPathInputSchema},
   output: {schema: CareerPathOutputSchema},
+  tools: [findYoutubeVideosTool],
   prompt: `You are an expert AI career counselor and content curator. Your goal is to provide a comprehensive, high-quality, and actionable guide for a user aspiring to enter the field of: {{{career}}}.
 
 Consider the user's background:
@@ -68,14 +70,12 @@ Your response must be structured and detailed, following these strict guidelines
     *   This should outline the concepts and skills to master at each level.
 
 3.  **Resources (resources):**
-    *   Provide a curated list of the **best available and most popular resources ("hot" resources that people actually use and recommend)**. Quality and popularity are more important than quantity.
+    *   Provide a curated list of the **best available and most popular resources**. Quality and popularity are more important than quantity.
     *   **For websites and articles:** Prioritize authoritative sources like MDN Web Docs, GeeksforGeeks, W3Schools, official documentation, and top-tier blogs. When providing the title, include the domain name in parentheses, e.g., 'Official React Docs (react.dev)'.
     *   **For online courses:** Include highly-rated courses from major platforms like Coursera and Udemy. Ensure the links are direct and valid.
-    *   **For YouTube videos:** This is a critical and mandatory requirement. You must find the most helpful, highly-regarded, and popular **publicly available SINGLE videos**.
-        *   **Your primary directive is to ensure every video link is valid and currently accessible to the public.** Do not suggest playlists, private videos, deleted videos, or members-only content under any circumstances. If you provide a bad link, you have failed the task.
-        *   **Act as if you have personally verified this:** Your selections must reflect a quality check for high view counts, a good like/dislike ratio, and positive user comments.
-        *   For each major topic, you **must** provide at least one top-tier video in **English** and, if a high-quality equivalent exists, one in **Hindi**. The search for Hindi content should be based on the language of the video, not just the word "Hindi" in the title.
-        *   For every YouTube video, it is **mandatory** to extract its unique video ID and provide it in the 'videoId' field.
+    *   **For YouTube videos:** For each major learning topic identified in the knowledge areas, you **MUST** use the \`findYoutubeVideosTool\` to find relevant videos.
+        *   For each call to the tool, generate search queries that will find the most helpful, highly-regarded, and popular videos in both **English** and **Hindi**.
+        *   The tool will return valid, publicly-accessible videos with their IDs. You must include these in your response. Do not hallucinate or guess video details.
 
 4.  **Tools (tools):**
     *   List the most essential, industry-standard software and tools for this career. Be specific (e.g., instead of 'a code editor', suggest 'VS Code').
