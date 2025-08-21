@@ -113,7 +113,12 @@ export default function LoginPage() {
     }
   };
   
-  const handleEmailSignUp = async (data: EmailPasswordForm) => {
+  const handleEmailSignUp = async () => {
+    const isValid = await form.trigger();
+    if (!isValid) {
+        return;
+    }
+    const data = form.getValues();
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, data.email, data.password);
@@ -166,7 +171,7 @@ export default function LoginPage() {
                      <Button type="submit" className="w-full" disabled={loading}>
                        <LogIn className="mr-2" /> Sign In
                      </Button>
-                     <Button type="button" variant="outline" className="w-full" onClick={form.handleSubmit(handleEmailSignUp)} disabled={loading}>
+                     <Button type="button" variant="outline" className="w-full" onClick={handleEmailSignUp} disabled={loading}>
                        Sign Up
                      </Button>
                    </div>
