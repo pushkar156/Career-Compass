@@ -71,11 +71,11 @@ Your response must be structured and detailed, following these strict guidelines
     *   Provide a curated list of the **best available and most popular resources ("hot" resources that people actually use and recommend)**. Quality and popularity are more important than quantity.
     *   **For websites and articles:** Prioritize authoritative sources like MDN Web Docs, GeeksforGeeks, W3Schools, official documentation, and top-tier blogs. When providing the title, include the domain name in parentheses, e.g., 'Official React Docs (react.dev)'.
     *   **For online courses:** Include highly-rated courses from major platforms like Coursera and Udemy. Ensure the links are direct and valid.
-    *   **For YouTube videos:** This is critical. Find the most helpful, highly-regarded, and popular **publicly available SINGLE videos**.
-        *   **Do not suggest playlists, private videos, deleted videos, or members-only content.** Every video must be currently accessible to the public.
-        *   **Act as if you have verified this:** Pretend you have checked each video for high view counts, a good like/dislike ratio, and positive user comments. Your selections should reflect this quality check.
+    *   **For YouTube videos:** This is a critical and mandatory requirement. You must find the most helpful, highly-regarded, and popular **publicly available SINGLE videos**.
+        *   **Your primary directive is to ensure every video link is valid and currently accessible to the public.** Do not suggest playlists, private videos, deleted videos, or members-only content under any circumstances. If you provide a bad link, you have failed the task.
+        *   **Act as if you have personally verified this:** Your selections must reflect a quality check for high view counts, a good like/dislike ratio, and positive user comments.
         *   For each major topic, you **must** provide at least one top-tier video in **English** and, if a high-quality equivalent exists, one in **Hindi**. The search for Hindi content should be based on the language of the video, not just the word "Hindi" in the title.
-        *   For every YouTube video, you **must** extract its unique video ID and provide it in the 'videoId' field.
+        *   For every YouTube video, it is **mandatory** to extract its unique video ID and provide it in the 'videoId' field.
 
 4.  **Tools (tools):**
     *   List the most essential, industry-standard software and tools for this career. Be specific (e.g., instead of 'a code editor', suggest 'VS Code').
