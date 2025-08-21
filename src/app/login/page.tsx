@@ -259,6 +259,23 @@ export default function LoginPage() {
                 </span>
               </div>
             </div>
+            
+            {/* Google Button */}
+            <Button onClick={handleGoogleSignIn} className="w-full" variant="outline" disabled={loading}>
+              <GoogleIcon className="mr-2" />
+              Sign In with Google
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or use your phone
+                </span>
+              </div>
+            </div>
 
             {/* Phone Form */}
             {phoneSignInStep === 'entry' && (
@@ -291,12 +308,6 @@ export default function LoginPage() {
                 </div>
               </form>
             )}
-
-            {/* Google Button */}
-            <Button onClick={handleGoogleSignIn} className="w-full" variant="outline" disabled={loading}>
-              <GoogleIcon className="mr-2" />
-              Sign In with Google
-            </Button>
           </CardContent>
         </Card>
       </div>
@@ -310,5 +321,3 @@ declare global {
     recaptchaVerifier?: RecaptchaVerifier;
   }
 }
-
-    
