@@ -12,6 +12,9 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  type ConfirmationResult,
 } from 'firebase/auth';
 import type { FirebaseError } from 'firebase/app';
 import { app } from '@/lib/firebase';
@@ -20,8 +23,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Compass, Mail, KeyRound, LogIn } from 'lucide-react';
+import { Compass, Mail, KeyRound, LogIn, Phone, MessageSquare } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
@@ -30,8 +33,17 @@ const emailPasswordSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
-
 type EmailPasswordForm = z.infer<typeof emailPasswordSchema>;
+
+const phoneSchema = z.object({
+  phone: z.string().regex(/^\+[1-9]\d{1,14}$/, 'Please enter a valid phone number with country code (e.g., +12223334444).'),
+});
+type PhoneForm = z.infer<typeof phoneSchema>;
+
+const codeSchema = z.object({
+  code: z.string().min(6, 'Verification code must be 6 digits.').max(6),
+});
+type CodeForm = z.infer<typeof codeSchema>;
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -46,12 +58,25 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const [phoneSignInStep, setPhoneSignInStep] = useState<'entry' | 'verify'>('entry');
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
+  const setupRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': (response: any) => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        },
+      });
+    }
+    return window.recaptchaVerifier;
+  }
+
   const handleAuthError = (error: any) => {
     let description = 'An unexpected error occurred. Please try again.';
-    // Check if it's a Firebase error by looking for the 'code' property
     if (error && error.code) {
       const firebaseError = error as FirebaseError;
       switch (firebaseError.code) {
@@ -73,8 +98,20 @@ export default function LoginPage() {
         case 'auth/popup-closed-by-user':
           description = 'Sign-in popup closed before completion. Please try again.';
           break;
+        case 'auth/invalid-phone-number':
+            description = 'The phone number is not valid.';
+            break;
+        case 'auth/too-many-requests':
+            description = 'Too many requests. Please try again later.';
+            break;
+        case 'auth/code-expired':
+            description = 'The verification code has expired. Please send a new one.';
+            break;
+        case 'auth/invalid-verification-code':
+            description = 'The verification code is invalid. Please try again.';
+            break;
         default:
-          description = firebaseError.message; // Use the specific firebase error message
+          description = firebaseError.message;
       }
     }
     toast({
@@ -96,9 +133,19 @@ export default function LoginPage() {
     }
   };
 
-  const form = useForm<EmailPasswordForm>({
+  const emailForm = useForm<EmailPasswordForm>({
     resolver: zodResolver(emailPasswordSchema),
     defaultValues: { email: '', password: '' },
+  });
+
+  const phoneForm = useForm<PhoneForm>({
+    resolver: zodResolver(phoneSchema),
+    defaultValues: { phone: '' },
+  });
+
+  const codeForm = useForm<CodeForm>({
+    resolver: zodResolver(codeSchema),
+    defaultValues: { code: '' },
   });
 
   const handleEmailSignIn = async (data: EmailPasswordForm) => {
@@ -114,11 +161,9 @@ export default function LoginPage() {
   };
   
   const handleEmailSignUp = async () => {
-    const isValid = await form.trigger();
-    if (!isValid) {
-        return;
-    }
-    const data = form.getValues();
+    const isValid = await emailForm.trigger();
+    if (!isValid) return;
+    const data = emailForm.getValues();
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, data.email, data.password);
@@ -130,8 +175,40 @@ export default function LoginPage() {
     }
   };
 
+  const onSendVerificationCode = async ({ phone }: PhoneForm) => {
+    setLoading(true);
+    try {
+      const verifier = setupRecaptcha();
+      const confirmation = await signInWithPhoneNumber(auth, phone, verifier);
+      setConfirmationResult(confirmation);
+      setPhoneSignInStep('verify');
+      toast({
+        title: 'Verification Code Sent',
+        description: `A code has been sent to ${phone}.`,
+      });
+    } catch (error) {
+      handleAuthError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onVerifyCode = async ({ code }: CodeForm) => {
+    if (!confirmationResult) return;
+    setLoading(true);
+    try {
+      await confirmationResult.confirm(code);
+      router.push('/');
+    } catch (error) {
+      handleAuthError(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <div id="recaptcha-container"></div>
       <div className="w-full max-w-md mx-auto">
         <div className="text-center mb-8">
           <Compass className="h-12 w-12 text-primary mx-auto mb-4" />
@@ -143,52 +220,95 @@ export default function LoginPage() {
             <CardTitle className="font-headline text-2xl text-center">Welcome Back</CardTitle>
             <CardDescription className="text-center">Choose your sign-in method</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="email" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="email">Email</TabsTrigger>
-                <TabsTrigger value="social">Google</TabsTrigger>
-              </TabsList>
-              <TabsContent value="email">
-                <form onSubmit={form.handleSubmit(handleEmailSignIn)} className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input id="email" type="email" placeholder="you@example.com" {...form.register('email')} className="pl-10" />
-                    </div>
-                    {form.formState.errors.email && <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <div className="relative">
-                      <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input id="password" type="password" placeholder="••••••••" {...form.register('password')} className="pl-10" />
-                    </div>
-                    {form.formState.errors.password && <p className="text-xs text-destructive">{form.formState.errors.password.message}</p>}
-                  </div>
-                   <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                     <Button type="submit" className="w-full" disabled={loading}>
-                       <LogIn className="mr-2" /> Sign In
-                     </Button>
-                     <Button type="button" variant="outline" className="w-full" onClick={handleEmailSignUp} disabled={loading}>
-                       Sign Up
-                     </Button>
-                   </div>
-                </form>
-              </TabsContent>
-              <TabsContent value="social">
-                <div className="pt-4">
-                  <Button onClick={handleGoogleSignIn} className="w-full" variant="outline" disabled={loading}>
-                    <GoogleIcon className="mr-2" />
-                    Sign In with Google
-                  </Button>
+          <CardContent className="space-y-6">
+            {/* Email Form */}
+            <form onSubmit={emailForm.handleSubmit(handleEmailSignIn)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                 <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input id="email" type="email" placeholder="you@example.com" {...emailForm.register('email')} className="pl-10" />
                 </div>
-              </TabsContent>
-            </Tabs>
+                {emailForm.formState.errors.email && <p className="text-xs text-destructive">{emailForm.formState.errors.email.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input id="password" type="password" placeholder="••••••••" {...emailForm.register('password')} className="pl-10" />
+                </div>
+                {emailForm.formState.errors.password && <p className="text-xs text-destructive">{emailForm.formState.errors.password.message}</p>}
+              </div>
+               <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                 <Button type="submit" className="w-full" disabled={loading}>
+                   <LogIn className="mr-2" /> Sign In
+                 </Button>
+                 <Button type="button" variant="outline" className="w-full" onClick={handleEmailSignUp} disabled={loading}>
+                   Sign Up
+                 </Button>
+               </div>
+            </form>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            {/* Phone Form */}
+            {phoneSignInStep === 'entry' && (
+              <form onSubmit={phoneForm.handleSubmit(onSendVerificationCode)} className="space-y-4">
+                 <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input id="phone" type="tel" placeholder="+1 123 456 7890" {...phoneForm.register('phone')} className="pl-10" />
+                    </div>
+                    {phoneForm.formState.errors.phone && <p className="text-xs text-destructive">{phoneForm.formState.errors.phone.message}</p>}
+                 </div>
+                 <Button type="submit" className="w-full" variant="outline" disabled={loading}>Send Code</Button>
+              </form>
+            )}
+
+            {phoneSignInStep === 'verify' && (
+              <form onSubmit={codeForm.handleSubmit(onVerifyCode)} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="code">Verification Code</Label>
+                  <div className="relative">
+                      <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Input id="code" type="text" placeholder="123456" {...codeForm.register('code')} className="pl-10" />
+                  </div>
+                  {codeForm.formState.errors.code && <p className="text-xs text-destructive">{codeForm.formState.errors.code.message}</p>}
+                </div>
+                <div className="flex gap-2">
+                  <Button type="submit" className="w-full" variant="outline" disabled={loading}>Verify & Sign In</Button>
+                  <Button type="button" variant="link" onClick={() => setPhoneSignInStep('entry')} disabled={loading}>Back</Button>
+                </div>
+              </form>
+            )}
+
+            {/* Google Button */}
+            <Button onClick={handleGoogleSignIn} className="w-full" variant="outline" disabled={loading}>
+              <GoogleIcon className="mr-2" />
+              Sign In with Google
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
   );
 }
+
+// Add this to your global declarations if you use TypeScript in a separate file
+declare global {
+  interface Window {
+    recaptchaVerifier?: RecaptchaVerifier;
+  }
+}
+
+    
