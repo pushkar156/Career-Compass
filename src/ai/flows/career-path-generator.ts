@@ -15,6 +15,8 @@ import {z} from 'genkit';
 
 const CareerPathInputSchema = z.object({
   career: z.string().describe('The career or field of study the user is interested in.'),
+  currentRole: z.string().optional().describe("The user's current role or educational background."),
+  interests: z.string().optional().describe("A list of the user's interests."),
 });
 export type CareerPathInput = z.infer<typeof CareerPathInputSchema>;
 
@@ -49,6 +51,10 @@ const careerPathPrompt = ai.definePrompt({
   output: {schema: CareerPathOutputSchema},
   prompt: `You are an expert AI career counselor. Your goal is to provide a comprehensive, high-quality, and actionable guide for a user aspiring to enter the field of: {{{career}}}.
 
+Consider the user's background:
+{{#if currentRole}}Current Role: {{{currentRole}}}{{/if}}
+{{#if interests}}Interests: {{{interests}}}{{/if}}
+
 Your response must be structured and detailed, following these strict guidelines:
 
 1.  **Roadmap (roadmap):**
@@ -63,10 +69,10 @@ Your response must be structured and detailed, following these strict guidelines
 
 3.  **Resources (resources):**
     *   Provide a curated list of the **best available resources**. Quality over quantity.
-    *   **For websites and articles:** Prioritize authoritative sources. For technical fields, this includes sites like MDN Web Docs, GeeksforGeeks, W3Schools, official documentation, and top-tier blogs. When providing the title, include the domain name in parentheses, e.g., 'Official React Docs (react.dev)'.
-    *   **For YouTube videos:** Find highly-rated, **publicly available** videos from reputable creators. Do not suggest private or deleted videos. If possible and relevant, include options in both **English and Hindi**. For each video, you **must** extract its unique video ID and provide it in the 'videoId' field.
-    *   **CRITICAL:** Every single URL must be a valid, working, direct link to the resource. Do not provide links to search queries.
-    *   For each resource, specify its title, URL, type, and videoId (if applicable).
+    *   **For websites and articles:** Prioritize authoritative sources like MDN Web Docs, GeeksforGeeks, W3Schools, official documentation, and top-tier blogs. When providing the title, include the domain name in parentheses, e.g., 'Official React Docs (react.dev)'.
+    *   **For online courses:** Include highly-rated courses from platforms like Coursera and Udemy.
+    *   **For YouTube videos:** Find highly-rated, **publicly available SINGLE videos**, not playlists. Do not suggest private or deleted videos. For each topic, provide at least one video in **English** and, if available, one in **Hindi**. For each video, you **must** extract its unique video ID and provide it in the 'videoId' field.
+    *   **CRITICAL:** Every single URL must be a valid, working, direct link to the resource. Do not provide links to search queries or unavailable content.
 
 4.  **Tools (tools):**
     *   List the most essential, industry-standard software and tools for this career. Be specific (e.g., instead of 'a code editor', suggest 'VS Code').
