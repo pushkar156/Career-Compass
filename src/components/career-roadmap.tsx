@@ -57,20 +57,20 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
 
   const progress = allKnowledgeAreas.length > 0 ? (completedTasks.length / allKnowledgeAreas.length) * 100 : 0;
   
-  const getIconForResource = (resource: Resource) => {
-    switch (resource.type) {
+  const getIconForResource = (resourceType: Resource['type']) => {
+    switch (resourceType) {
       case 'video':
-        return <Youtube className="h-4 w-4 text-red-500 mr-3 shrink-0" />;
+        return <Youtube className="h-5 w-5 text-red-500 mr-3 shrink-0" />;
       case 'course':
-        return <GraduationCap className="h-4 w-4 text-primary mr-3 shrink-0" />;
+        return <GraduationCap className="h-5 w-5 text-primary mr-3 shrink-0" />;
       case 'book':
-        return <Book className="h-4 w-4 text-primary mr-3 shrink-0" />;
+        return <Book className="h-5 w-5 text-primary mr-3 shrink-0" />;
       case 'article':
-        return <FileText className="h-4 w-4 text-primary mr-3 shrink-0" />;
+        return <FileText className="h-5 w-5 text-primary mr-3 shrink-0" />;
       case 'website':
-        return <Globe className="h-4 w-4 text-primary mr-3 shrink-0" />;
+        return <Globe className="h-5 w-5 text-primary mr-3 shrink-0" />;
       default:
-        return <BookOpen className="h-4 w-4 text-primary mr-3 shrink-0" />;
+        return <BookOpen className="h-5 w-5 text-primary mr-3 shrink-0" />;
     }
   };
 
@@ -175,7 +175,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                       <AccordionItem value="item-1">
                         <AccordionTrigger className="font-bold text-lg">Beginner to Intermediate</AccordionTrigger>
                         <AccordionContent>
-                          <ul className="list-disc list-inside space-y-2 pl-4">
+                          <ul className="list-decimal list-inside space-y-2 pl-4">
                             {data.roadmap?.beginnerToIntermediate?.map((step, index) => (
                               <li key={index}>{step}</li>
                             ))}
@@ -185,7 +185,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                       <AccordionItem value="item-2">
                         <AccordionTrigger className="font-bold text-lg">Intermediate to Pro</AccordionTrigger>
                         <AccordionContent>
-                          <ul className="list-disc list-inside space-y-2 pl-4">
+                          <ul className="list-decimal list-inside space-y-2 pl-4">
                             {data.roadmap?.intermediateToPro?.map((step, index) => (
                               <li key={index}>{step}</li>
                             ))}
@@ -195,7 +195,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                       <AccordionItem value="item-3">
                         <AccordionTrigger className="font-bold text-lg">Pro to Advanced</AccordionTrigger>
                         <AccordionContent>
-                          <ul className="list-disc list-inside space-y-2 pl-4">
+                          <ul className="list-decimal list-inside space-y-2 pl-4">
                             {data.roadmap?.proToAdvanced?.map((step, index) => (
                               <li key={index}>{step}</li>
                             ))}
@@ -245,23 +245,47 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                     <CardDescription>Curated courses, videos, and articles to help you on your journey.</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ul className="space-y-3">
+                    <Accordion type="single" collapsible className="w-full space-y-2">
                       {(data.resources || []).map((resource, index) => (
-                        <li key={index} className="p-3 bg-slate-50 rounded-md transition-all hover:bg-slate-100">
-                           <a href={resource.url} target="_blank" rel="noopener noreferrer" className="flex items-start">
-                            {getIconForResource(resource)}
-                            <div className="flex-1">
-                              <span className="font-medium text-sm">{resource.title}</span>
+                        <AccordionItem value={`item-${index}`} key={index} className="bg-slate-50 rounded-md px-4 border">
+                          <AccordionTrigger className="py-3 hover:no-underline">
+                            <div className="flex items-center text-left">
+                              {getIconForResource(resource.type)}
+                              <span className="font-medium text-sm flex-1">{resource.title}</span>
                               {index === 0 && (
-                                 <Badge variant="outline" className="ml-2 border-accent text-accent">
+                                <Badge variant="outline" className="ml-2 border-accent text-accent">
                                   <Award className="mr-1 h-3 w-3" /> Expert Pick
                                 </Badge>
                               )}
                             </div>
-                           </a>
-                        </li>
+                          </AccordionTrigger>
+                          <AccordionContent className="pb-4">
+                            {resource.type === 'video' && resource.videoId ? (
+                              <div>
+                                <div className="aspect-video w-full overflow-hidden rounded-lg mb-2">
+                                  <iframe
+                                    className="w-full h-full"
+                                    src={`https://www.youtube.com/embed/${resource.videoId}`}
+                                    title={resource.title}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                  ></iframe>
+                                </div>
+                                <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                                  Watch on YouTube &rarr;
+                                </a>
+                              </div>
+                            ) : (
+                              <p className="text-sm">
+                                <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                  Go to resource &rarr;
+                                </a>
+                              </p>
+                            )}
+                          </AccordionContent>
+                        </AccordionItem>
                       ))}
-                    </ul>
+                    </Accordion>
                   </CardContent>
                 </Card>
               </TabsContent>

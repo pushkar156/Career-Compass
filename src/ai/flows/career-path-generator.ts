@@ -19,9 +19,10 @@ const CareerPathInputSchema = z.object({
 export type CareerPathInput = z.infer<typeof CareerPathInputSchema>;
 
 const ResourceSchema = z.object({
-  title: z.string().describe('The title of the resource.'),
+  title: z.string().describe("The title of the resource. For websites, include the domain name in parentheses, e.g., 'Official React Docs (react.dev)'."),
   url: z.string().url().describe('A valid and working URL for the resource.'),
   type: z.enum(['video', 'course', 'book', 'article', 'website']).describe('The type of the resource.'),
+  videoId: z.string().optional().describe('If the resource is a YouTube video, provide its unique video ID.'),
 });
 
 const RoadmapSchema = z.object({
@@ -62,10 +63,10 @@ Your response must be structured and detailed, following these strict guidelines
 
 3.  **Resources (resources):**
     *   Provide a curated list of the **best available resources**. Quality over quantity.
-    *   **For websites and articles:** Prioritize authoritative sources. For technical fields, this includes sites like MDN Web Docs, GeeksforGeeks, W3Schools, official documentation, and top-tier blogs.
-    *   **For YouTube videos:** Find highly-rated, popular videos from reputable creators. If possible and relevant, include options in both **English and Hindi**.
+    *   **For websites and articles:** Prioritize authoritative sources. For technical fields, this includes sites like MDN Web Docs, GeeksforGeeks, W3Schools, official documentation, and top-tier blogs. When providing the title, include the domain name in parentheses, e.g., 'Official React Docs (react.dev)'.
+    *   **For YouTube videos:** Find highly-rated, **publicly available** videos from reputable creators. Do not suggest private or deleted videos. If possible and relevant, include options in both **English and Hindi**. For each video, you **must** extract its unique video ID and provide it in the 'videoId' field.
     *   **CRITICAL:** Every single URL must be a valid, working, direct link to the resource. Do not provide links to search queries.
-    *   For each resource, specify its title, URL, and type ('video', 'course', 'book', 'article', 'website').
+    *   For each resource, specify its title, URL, type, and videoId (if applicable).
 
 4.  **Tools (tools):**
     *   List the most essential, industry-standard software and tools for this career. Be specific (e.g., instead of 'a code editor', suggest 'VS Code').
