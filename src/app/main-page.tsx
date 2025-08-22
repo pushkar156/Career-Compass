@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User } from 'lucide-react';
+import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import { CareerRoadmap } from '@/components/career-roadmap';
 import { useAuth } from '@/hooks/use-auth';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 const FormSchema = z.object({
   desiredCareer: z.string().min(3, {
@@ -29,6 +30,34 @@ const FormSchema = z.object({
 });
 
 type UserInput = z.infer<typeof FormSchema>;
+
+const processSteps = [
+  {
+    icon: Handshake,
+    title: '1. Initiation & Rapport Building',
+    description: 'We begin by getting to know each other. This initial conversation is about building trust and open communication, ensuring you feel completely comfortable and understood.',
+  },
+  {
+    icon: Search,
+    title: '2. In-Depth Exploration',
+    description: 'Through detailed questionnaires and analytical assessments, we explore your personality, interests, skills, and experience to build a complete personal and professional profile.',
+  },
+  {
+    icon: Route,
+    title: '3. Decision Making',
+    description: 'Together, we analyze potential career paths that align with your profile. This stage focuses on narrowing down options and eliminating obstacles to help you make a confident, informed decision.',
+  },
+  {
+    icon: ListChecks,
+    title: '4. Action Plan Preparation',
+    description: 'Once a path is chosen, we co-create a detailed, step-by-step action plan. This includes resources, milestones, and a contingency strategy to prepare you for success.',
+  },
+  {
+    icon: CheckCircle,
+    title: '5. Implementation & Success',
+    description: 'The final stage is about executing your plan. With clear goals and deadlines, we support you as you take concrete steps toward your new career, transforming planning into achievement.',
+  },
+];
 
 export default function MainPage() {
   const [loading, setLoading] = useState(false);
@@ -141,7 +170,7 @@ export default function MainPage() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50/50">
       <div className="absolute top-4 right-4">
         {user && <UserMenu />}
       </div>
@@ -219,8 +248,63 @@ export default function MainPage() {
           </CardContent>
         </Card>
       </div>
+      
+      <div className="w-full max-w-4xl mx-auto mt-20">
+        <div className="text-center mb-10">
+          <h2 className="text-4xl font-headline font-bold text-slate-800">How It Works</h2>
+          <p className="mt-4 text-lg text-muted-foreground">Our Five-Stage Process to Your Career Success</p>
+        </div>
+        <div className="relative">
+          {/* Dotted line */}
+          <div className="absolute left-1/2 -translate-x-1/2 h-full w-0.5 border-l-2 border-dashed border-slate-300" aria-hidden="true"></div>
+          
+          <div className="space-y-12">
+            {processSteps.map((step, index) => {
+              const isEven = index % 2 === 0;
+              const Icon = step.icon;
+              return (
+                <div key={index} className="relative flex items-center">
+                  <div className={`w-1/2 ${isEven ? 'pr-8' : 'pl-8'}`}>
+                    {isEven && (
+                       <Card className="shadow-lg">
+                          <CardHeader>
+                            <CardTitle className="font-headline text-xl flex items-center gap-3">
+                              <Icon className="h-8 w-8 text-primary" />
+                              {step.title}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-muted-foreground">{step.description}</p>
+                          </CardContent>
+                        </Card>
+                    )}
+                  </div>
+                  
+                  {/* Timeline dot */}
+                  <div className="absolute left-1/2 -translate-x-1/2 w-4 h-4 bg-primary rounded-full ring-8 ring-slate-50/50"></div>
+
+                  <div className={`w-1/2 ${isEven ? 'pl-8' : 'pr-8'}`}>
+                     {!isEven && (
+                       <Card className="shadow-lg">
+                          <CardHeader>
+                            <CardTitle className="font-headline text-xl flex items-center gap-3">
+                              <Icon className="h-8 w-8 text-primary" />
+                              {step.title}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-muted-foreground">{step.description}</p>
+                          </CardContent>
+                        </Card>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-    
