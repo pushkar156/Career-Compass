@@ -11,7 +11,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { generateCareerPathAction } from '@/app/actions';
 import type { CareerPathOutput } from '@/ai/flows/career-path-generator';
@@ -19,7 +19,8 @@ import { CareerRoadmap } from '@/components/career-roadmap';
 import { useAuth } from '@/hooks/use-auth';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
+import { InteractiveQuestionnaire } from '@/components/interactive-questionnaire';
+
 
 const FormSchema = z.object({
   desiredCareer: z.string().min(3, {
@@ -31,40 +32,13 @@ const FormSchema = z.object({
 
 type UserInput = z.infer<typeof FormSchema>;
 
-const processSteps = [
-  {
-    icon: Handshake,
-    title: '1. Initiation & Rapport Building',
-    description: 'We begin by getting to know each other. This initial conversation is about building trust and open communication, ensuring you feel completely comfortable and understood.',
-  },
-  {
-    icon: Search,
-    title: '2. In-Depth Exploration',
-    description: 'Through detailed questionnaires and analytical assessments, we explore your personality, interests, skills, and experience to build a complete personal and professional profile.',
-  },
-  {
-    icon: Route,
-    title: '3. Decision Making',
-    description: 'Together, we analyze potential career paths that align with your profile. This stage focuses on narrowing down options and eliminating obstacles to help you make a confident, informed decision.',
-  },
-  {
-    icon: ListChecks,
-    title: '4. Action Plan Preparation',
-    description: 'Once a path is chosen, we co-create a detailed, step-by-step action plan. This includes resources, milestones, and a contingency strategy to prepare you for success.',
-  },
-  {
-    icon: CheckCircle,
-    title: '5. Implementation & Success',
-    description: 'The final stage is about executing your plan. With clear goals and deadlines, we support you as you take concrete steps toward your new career, transforming planning into achievement.',
-  },
-];
-
 export default function MainPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CareerPathOutput | null>(null);
   const [userInput, setUserInput] = useState<UserInput | null>(null);
   const { toast } = useToast();
   const { user, loading: authLoading, signOut } = useAuth();
+  const [isQuestionnaireOpen, setIsQuestionnaireOpen] = useState(false);
 
   const form = useForm<UserInput>({
     resolver: zodResolver(FormSchema),
@@ -105,6 +79,18 @@ export default function MainPage() {
     setUserInput(null);
     form.reset();
   };
+
+  const handleQuestionnaireSubmit = (data: any) => {
+    // This is where you would handle the data from the questionnaire
+    console.log('Questionnaire submitted:', data);
+    // For now, let's just use the desiredCareer to generate a roadmap
+    const mappedData: UserInput = {
+      desiredCareer: data.step2.careerGoal,
+      currentRole: data.step2.currentBackground,
+      interests: data.step3.interests,
+    }
+    onSubmit(mappedData);
+  }
 
   if (authLoading) {
     return (
@@ -170,6 +156,7 @@ export default function MainPage() {
   );
 
   return (
+    <>
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50/50">
       <div className="absolute top-4 right-4">
         {user && <UserMenu />}
@@ -251,72 +238,52 @@ export default function MainPage() {
       
       <div className="w-full max-w-4xl mx-auto mt-24 mb-16">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-headline font-bold text-slate-800">How It Works</h2>
-          <p className="mt-4 text-lg text-muted-foreground">Our Five-Stage Process to Your Career Success</p>
+          <h2 className="text-4xl font-headline font-bold text-slate-800">Your Guided Journey</h2>
+          <p className="mt-4 text-lg text-muted-foreground">Answer a few questions to build a hyper-personalized career plan.</p>
         </div>
-        <div className="relative">
-          <div className="hidden md:block absolute left-1/2 -translate-x-1/2 h-full w-0.5 border-l-2 border-dashed border-slate-300" aria-hidden="true"></div>
-          
-          <div className="space-y-12 md:space-y-0 md:grid md:grid-cols-1 md:gap-y-12">
-            {processSteps.map((step, index) => {
-              const isEven = index % 2 === 0;
-              const Icon = step.icon;
-              return (
-                <div key={index} className="md:relative md:flex md:items-center">
-                  <div className="md:w-1/2 md:pr-8">
-                    {isEven && (
-                       <Card className="shadow-lg w-full">
-                          <CardHeader>
-                            <CardTitle className="font-headline text-xl flex items-center gap-3">
-                              <Icon className="h-8 w-8 text-primary shrink-0" />
-                              {step.title}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-muted-foreground">{step.description}</p>
-                          </CardContent>
-                        </Card>
-                    )}
-                  </div>
-                  
-                  <div className="hidden md:block absolute left-1/2 -translate-x-1/2 w-4 h-4 bg-primary rounded-full ring-8 ring-slate-50/50 z-10"></div>
-
-                  <div className="md:w-1/2 md:pl-8 mt-4 md:mt-0">
-                     {!isEven && (
-                       <Card className="shadow-lg w-full">
-                          <CardHeader>
-                            <CardTitle className="font-headline text-xl flex items-center gap-3">
-                              <Icon className="h-8 w-8 text-primary shrink-0" />
-                              {step.title}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-muted-foreground">{step.description}</p>
-                          </CardContent>
-                        </Card>
-                    )}
-                     {isEven && (
-                         <div className="md:hidden">
-                           <Card className="shadow-lg w-full">
-                              <CardHeader>
-                                <CardTitle className="font-headline text-xl flex items-center gap-3">
-                                  <Icon className="h-8 w-8 text-primary shrink-0" />
-                                  {step.title}
-                                </CardTitle>
-                              </CardHeader>
-                              <CardContent>
-                                <p className="text-muted-foreground">{step.description}</p>
-                              </CardContent>
-                            </Card>
-                        </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <Card className="shadow-2xl shadow-slate-200 text-center p-8">
+            <CardHeader>
+                <Handshake className="h-12 w-12 text-primary mx-auto mb-4" />
+                <CardTitle className="font-headline text-3xl">Let's Get to Know You</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                Ready to find your calling? We'll walk you through a simple, 5-step process to explore your passions, define your goals, and create a custom-built action plan for your dream career.
+                </p>
+                <Button size="lg" onClick={() => setIsQuestionnaireOpen(true)}>
+                    Start My Journey
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+            </CardContent>
+        </Card>
       </div>
     </div>
+
+    <InteractiveQuestionnaire 
+        isOpen={isQuestionnaireOpen} 
+        onOpenChange={setIsQuestionnaireOpen}
+        onSubmit={handleQuestionnaireSubmit}
+    />
+    </>
   );
+}
+
+function ArrowRight(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+        </svg>
+    )
 }
