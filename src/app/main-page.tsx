@@ -174,7 +174,7 @@ export default function MainPage() {
       <div className="absolute top-4 right-4">
         {user && <UserMenu />}
       </div>
-      <div className="w-full max-w-2xl mx-auto">
+      <div className="w-full max-w-2xl mx-auto pt-16">
         <div className="text-center mb-10">
           <div className="flex items-center justify-center mb-4">
             <Compass className="h-12 w-12 text-primary" />
@@ -249,27 +249,26 @@ export default function MainPage() {
         </Card>
       </div>
       
-      <div className="w-full max-w-4xl mx-auto mt-20">
-        <div className="text-center mb-10">
+      <div className="w-full max-w-4xl mx-auto mt-24 mb-16">
+        <div className="text-center mb-12">
           <h2 className="text-4xl font-headline font-bold text-slate-800">How It Works</h2>
           <p className="mt-4 text-lg text-muted-foreground">Our Five-Stage Process to Your Career Success</p>
         </div>
         <div className="relative">
-          {/* Dotted line */}
-          <div className="absolute left-1/2 -translate-x-1/2 h-full w-0.5 border-l-2 border-dashed border-slate-300" aria-hidden="true"></div>
+          <div className="hidden md:block absolute left-1/2 -translate-x-1/2 h-full w-0.5 border-l-2 border-dashed border-slate-300" aria-hidden="true"></div>
           
-          <div className="space-y-12">
+          <div className="space-y-12 md:space-y-0 md:grid md:grid-cols-1 md:gap-y-12">
             {processSteps.map((step, index) => {
               const isEven = index % 2 === 0;
               const Icon = step.icon;
               return (
-                <div key={index} className="relative flex items-center">
-                  <div className={`w-1/2 ${isEven ? 'pr-8' : 'pl-8'}`}>
+                <div key={index} className="md:relative md:flex md:items-center">
+                  <div className="md:w-1/2 md:pr-8">
                     {isEven && (
-                       <Card className="shadow-lg">
+                       <Card className="shadow-lg w-full">
                           <CardHeader>
                             <CardTitle className="font-headline text-xl flex items-center gap-3">
-                              <Icon className="h-8 w-8 text-primary" />
+                              <Icon className="h-8 w-8 text-primary shrink-0" />
                               {step.title}
                             </CardTitle>
                           </CardHeader>
@@ -280,15 +279,14 @@ export default function MainPage() {
                     )}
                   </div>
                   
-                  {/* Timeline dot */}
-                  <div className="absolute left-1/2 -translate-x-1/2 w-4 h-4 bg-primary rounded-full ring-8 ring-slate-50/50"></div>
+                  <div className="hidden md:block absolute left-1/2 -translate-x-1/2 w-4 h-4 bg-primary rounded-full ring-8 ring-slate-50/50 z-10"></div>
 
-                  <div className={`w-1/2 ${isEven ? 'pl-8' : 'pr-8'}`}>
+                  <div className="md:w-1/2 md:pl-8 mt-4 md:mt-0">
                      {!isEven && (
-                       <Card className="shadow-lg">
+                       <Card className="shadow-lg w-full">
                           <CardHeader>
                             <CardTitle className="font-headline text-xl flex items-center gap-3">
-                              <Icon className="h-8 w-8 text-primary" />
+                              <Icon className="h-8 w-8 text-primary shrink-0" />
                               {step.title}
                             </CardTitle>
                           </CardHeader>
@@ -296,6 +294,21 @@ export default function MainPage() {
                             <p className="text-muted-foreground">{step.description}</p>
                           </CardContent>
                         </Card>
+                    )}
+                     {isEven && (
+                         <div className="md:hidden">
+                           <Card className="shadow-lg w-full">
+                              <CardHeader>
+                                <CardTitle className="font-headline text-xl flex items-center gap-3">
+                                  <Icon className="h-8 w-8 text-primary shrink-0" />
+                                  {step.title}
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <p className="text-muted-foreground">{step.description}</p>
+                              </CardContent>
+                            </Card>
+                        </div>
                     )}
                   </div>
                 </div>
@@ -307,4 +320,3 @@ export default function MainPage() {
     </div>
   );
 }
-
