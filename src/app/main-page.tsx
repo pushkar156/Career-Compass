@@ -33,7 +33,29 @@ const FormSchema = z.object({
 
 type UserInput = z.infer<typeof FormSchema>;
 
-const CareerExplorationResult = ({ data, userInput, onSelectRole, onReset }: { 
+export default function MainPage() {
+  const [loading, setLoading] = useState(false);
+  const [loadingStage, setLoadingStage] = useState<'exploring' | 'generating' | 'fetching_opportunities' | null>(null);
+  const [explorationResult, setExplorationResult] = useState<CareerExplorationOutput | null>(null);
+  const [opportunitiesResult, setOpportunitiesResult] = useState<CareerOpportunitiesOutput | null>(null);
+  const [finalResult, setFinalResult] = useState<CareerPathOutput | null>(null);
+  const [userInput, setUserInput] = useState<UserInput | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const { toast } = useToast();
+  const { user, loading: authLoading, signOut } = useAuth();
+  const [isQuestionnaireOpen, setIsQuestionnaireOpen] = useState(false);
+  const [userPath, setUserPath] = useState<'explore' | 'direct' | null>(null);
+
+  const form = useForm<UserInput>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      desiredCareer: '',
+      currentRole: '',
+      interests: '',
+    },
+  });
+  
+  const CareerExplorationResult = ({ data, userInput, onSelectRole, onReset }: { 
       data: CareerExplorationOutput, 
       userInput: UserInput, 
       onSelectRole: (role: string) => void,
@@ -72,7 +94,7 @@ const CareerExplorationResult = ({ data, userInput, onSelectRole, onReset }: {
       </div>
   );
 
-const CareerOpportunitiesResult = ({ data, role, onBack }: { data: CareerOpportunitiesOutput, role: string, onBack: () => void }) => (
+  const CareerOpportunitiesResult = ({ data, role, onBack }: { data: CareerOpportunitiesOutput, role: string, onBack: () => void }) => (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
         <div className="max-w-4xl mx-auto">
             <header className="mb-8">
@@ -133,29 +155,51 @@ const CareerOpportunitiesResult = ({ data, role, onBack }: { data: CareerOpportu
             </main>
         </div>
     </div>
-);
+  );
 
-export default function MainPage() {
-  const [loading, setLoading] = useState(false);
-  const [loadingStage, setLoadingStage] = useState<'exploring' | 'generating' | 'fetching_opportunities' | null>(null);
-  const [explorationResult, setExplorationResult] = useState<CareerExplorationOutput | null>(null);
-  const [opportunitiesResult, setOpportunitiesResult] = useState<CareerOpportunitiesOutput | null>(null);
-  const [finalResult, setFinalResult] = useState<CareerPathOutput | null>(null);
-  const [userInput, setUserInput] = useState<UserInput | null>(null);
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
-  const { toast } = useToast();
-  const { user, loading: authLoading, signOut } = useAuth();
-  const [isQuestionnaireOpen, setIsQuestionnaireOpen] = useState(false);
-  const [userPath, setUserPath] = useState<'explore' | 'direct' | null>(null);
-
-  const form = useForm<UserInput>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      desiredCareer: '',
-      currentRole: '',
-      interests: '',
-    },
-  });
+  const RoleSelectionScreen = ({ role, onGenerateRoadmap, onExploreOpportunities, onBack }: { role: string; onGenerateRoadmap: () => void; onExploreOpportunities: () => void; onBack: () => void; }) => (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50/50">
+        <div className="w-full max-w-4xl mx-auto text-center">
+            <Button variant="ghost" onClick={onBack} className="absolute top-6 left-6"><ArrowLeft className="mr-2 h-4 w-4"/>Back to exploration</Button>
+            <div className="text-center mb-10">
+                <h1 className="text-5xl font-headline font-bold text-slate-800">You've selected: {role}</h1>
+                <p className="mt-4 text-lg text-muted-foreground">What would you like to do next?</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <Card className="shadow-2xl shadow-slate-200 text-center p-8 hover:shadow-primary/20 transition-shadow">
+                    <CardHeader>
+                        <Route className="h-12 w-12 text-primary mx-auto mb-4" />
+                        <CardTitle className="font-headline text-3xl">Custom Roadmap</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground mb-6">
+                            Generate a personalized, step-by-step learning path to master this role.
+                        </p>
+                        <Button size="lg" onClick={onGenerateRoadmap}>
+                            Create My Plan
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+                    </CardContent>
+                </Card>
+                <Card className="shadow-2xl shadow-slate-200 text-center p-8 hover:shadow-primary/20 transition-shadow">
+                    <CardHeader>
+                        <TrendingUp className="h-12 w-12 text-primary mx-auto mb-4" />
+                        <CardTitle className="font-headline text-3xl">Explore Opportunities</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground mb-6">
+                            Get insights into job trends, salary expectations, and market demand for this role.
+                        </p>
+                        <Button size="lg" onClick={onExploreOpportunities}>
+                            Analyze Career
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    </div>
+  );
 
   async function onExploreSubmit(data: UserInput) {
     setLoading(true);
@@ -260,14 +304,19 @@ export default function MainPage() {
   
   const handleBackToExplore = () => {
       setFinalResult(null);
-      setExplorationResult(null);
+      // This is tricky. We need to re-run the exploration.
+      // For now, let's just go back to the beginning of the "direct" path
       setSelectedRole(null);
+      setExplorationResult(null); // This will show the input form again if userInput is set.
+      if (!userInput) { // If for some reason userInput is gone, go all the way back
+          setUserPath(null);
+      }
   }
 
   const handleBackToRoleSelection = () => {
       setOpportunitiesResult(null);
-      setSelectedRole(selectedRole); // Stay on role selection
-      setExplorationResult(null); // but don't show exploration result
+      setExplorationResult(null); // Don't show exploration result
+      setSelectedRole(selectedRole); // Stay on role selection by keeping selectedRole
   }
 
   const handleQuestionnaireSubmit = (data: any) => {
@@ -277,6 +326,7 @@ export default function MainPage() {
       currentRole: data.step2.currentBackground,
       interests: `${data.step3.interests}, ${data.step3.skills}`,
     }
+    form.reset(mappedData);
     onExploreSubmit(mappedData);
   }
 
@@ -325,7 +375,7 @@ export default function MainPage() {
                 data={explorationResult} 
                 userInput={userInput}
                 onSelectRole={handleSelectRole}
-                onReset={handleBackToExplore}
+                onReset={handleReset}
             />;
   }
   
@@ -366,48 +416,6 @@ export default function MainPage() {
         </Button>
       </PopoverContent>
     </Popover>
-  );
-
-  const RoleSelectionScreen = ({ role, onGenerateRoadmap, onExploreOpportunities, onBack }: { role: string; onGenerateRoadmap: () => void; onExploreOpportunities: () => void; onBack: () => void; }) => (
-    <div className="w-full max-w-4xl mx-auto text-center">
-        <Button variant="ghost" onClick={onBack} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Back to exploration</Button>
-        <div className="text-center mb-10">
-            <h1 className="text-5xl font-headline font-bold text-slate-800">You've selected: {role}</h1>
-            <p className="mt-4 text-lg text-muted-foreground">What would you like to do next?</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-             <Card className="shadow-2xl shadow-slate-200 text-center p-8 hover:shadow-primary/20 transition-shadow">
-                <CardHeader>
-                    <Route className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <CardTitle className="font-headline text-3xl">Custom Roadmap</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground mb-6">
-                        Generate a personalized, step-by-step learning path to master this role.
-                    </p>
-                    <Button size="lg" onClick={onGenerateRoadmap}>
-                        Create My Plan
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                </CardContent>
-            </Card>
-            <Card className="shadow-2xl shadow-slate-200 text-center p-8 hover:shadow-primary/20 transition-shadow">
-                <CardHeader>
-                    <TrendingUp className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <CardTitle className="font-headline text-3xl">Explore Opportunities</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground mb-6">
-                        Get insights into job trends, salary expectations, and market demand for this role.
-                    </p>
-                    <Button size="lg" onClick={onExploreOpportunities}>
-                        Analyze Career
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                </CardContent>
-            </Card>
-        </div>
-    </div>
   );
 
   const PathSelection = () => (
