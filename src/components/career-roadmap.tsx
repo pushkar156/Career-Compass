@@ -25,6 +25,7 @@ import {
   FileText,
   GraduationCap,
   ListTree,
+  DollarSign,
 } from 'lucide-react';
 
 interface CareerRoadmapProps {
@@ -38,6 +39,7 @@ interface CareerRoadmapProps {
 }
 
 type Resource = CareerPathOutput['resources'][0];
+type Tool = CareerPathOutput['tools'][0];
 
 export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) {
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
@@ -89,6 +91,20 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
       </label>
     </div>
   );
+
+  const getBadgeForCost = (cost: Tool['cost']) => {
+    switch (cost) {
+      case 'Free':
+        return <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">{cost}</Badge>;
+      case 'Paid':
+        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">{cost}</Badge>;
+      case 'Freemium':
+        return <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">{cost}</Badge>;
+      default:
+        return <Badge variant="outline">{cost}</Badge>;
+    }
+  }
+
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
@@ -294,14 +310,20 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                 <Card>
                   <CardHeader>
                     <CardTitle className="font-headline">Essential Tools</CardTitle>
-                    <CardDescription>The software and tools you'll need to master for this career.</CardDescription>
+                    <CardDescription>The software and tools you'll need to master for this career, from most to least recommended.</CardDescription>
                   </CardHeader>
                   <CardContent>
                      <ul className="space-y-3">
                       {(data.tools || []).map((tool, index) => (
-                        <li key={index} className="flex items-center p-3 bg-slate-50 rounded-md">
-                          <Wrench className="h-4 w-4 text-primary mr-3" />
-                          <span className="font-medium text-sm">{tool}</span>
+                        <li key={index} className="p-4 bg-slate-50 rounded-md border">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                                <Wrench className="h-5 w-5 text-primary mr-3" />
+                                <span className="font-semibold text-base">{tool.name}</span>
+                            </div>
+                            {getBadgeForCost(tool.cost)}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-2 ml-8">{tool.description}</p>
                         </li>
                       ))}
                     </ul>

@@ -34,11 +34,17 @@ const RoadmapSchema = z.object({
   proToAdvanced: z.array(z.string()).describe('A list of steps for the pro to advanced level.'),
 });
 
+const ToolSchema = z.object({
+    name: z.string().describe("The name of the tool."),
+    description: z.string().describe("A brief, one-sentence description of the tool's primary purpose."),
+    cost: z.enum(['Free', 'Paid', 'Freemium']).describe("The cost model of the tool."),
+});
+
 const CareerPathOutputSchema = z.object({
   roadmap: RoadmapSchema.describe('A personalized learning roadmap segmented by skill level.'),
   knowledgeAreas: RoadmapSchema.describe('List of required knowledge areas, segmented by skill level.'),
   resources: z.array(ResourceSchema).describe('List of relevant, high-quality resources.'),
-  tools: z.array(z.string()).describe('List of the essential tools for the field.'),
+  tools: z.array(ToolSchema).describe('List of the essential tools for the field, ordered from most to least recommended.'),
 });
 export type CareerPathOutput = z.infer<typeof CareerPathOutputSchema>;
 
@@ -78,7 +84,9 @@ Your response must be structured and detailed, following these strict guidelines
         *   The tool will return valid, publicly-accessible videos with their IDs. You must include these in your response. Do not hallucinate or guess video details.
 
 4.  **Tools (tools):**
-    *   List the most essential, industry-standard software and tools for this career. Be specific (e.g., instead of 'a code editor', suggest 'VS Code').
+    *   List the most essential, industry-standard software and tools for this career.
+    *   **Order the list from the most recommended tool to the least recommended.**
+    *   For each tool, you must provide its name, a brief one-sentence description, and its cost model ('Free', 'Paid', or 'Freemium').
 
 Return the entire response in a single, valid JSON object that adheres to the defined output schema. Every single URL must be a valid, working, direct link to the resource.`,
 });
