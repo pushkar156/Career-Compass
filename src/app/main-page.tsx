@@ -1,11 +1,13 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building } from 'lucide-react';
+import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building, MapPin, BarChart, PieChart } from 'lucide-react';
+import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
+
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -21,6 +23,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { InteractiveQuestionnaire } from '@/components/interactive-questionnaire';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Badge } from '@/components/ui/badge';
 
 
 const FormSchema = z.object({
@@ -94,68 +98,174 @@ export default function MainPage() {
       </div>
   );
 
-  const CareerOpportunitiesResult = ({ data, role, onBack }: { data: CareerOpportunitiesOutput, role: string, onBack: () => void }) => (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
-        <div className="max-w-4xl mx-auto">
-            <header className="mb-8">
-                <Button variant="ghost" onClick={onBack} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Back to Role Selection</Button>
-                <h1 className="text-4xl font-headline font-bold text-slate-800">Career Opportunities: {role}</h1>
-                <p className="text-muted-foreground mt-2">An AI-powered analysis of the job market and future trends for this role.</p>
-            </header>
+  const CareerOpportunitiesResult = ({ data, role, onBack }: { data: CareerOpportunitiesOutput, role: string, onBack: () => void }) => {
+    const payScaleData = useMemo(() => [
+        { level: 'Entry-Level', range: data.payScale.ranges.entry, fill: "var(--color-entry)" },
+        { level: 'Mid-Level', range: data.payScale.ranges.mid, fill: "var(--color-mid)" },
+        { level: 'Senior-Level', range: data.payScale.ranges.senior, fill: "var(--color-senior)" },
+    ], [data.payScale.ranges]);
 
-            <main className="space-y-6">
-                <Card>
-                    <CardHeader className="flex flex-row items-center gap-4">
-                        <TrendingUp className="h-8 w-8 text-primary" />
-                        <div>
-                            <CardTitle className="font-headline text-2xl">Upcoming Opportunities</CardTitle>
-                            <CardDescription>Future trends and the long-term outlook.</CardDescription>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground">{data.upcomingOpportunities}</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center gap-4">
-                        <Building className="h-8 w-8 text-primary" />
-                        <div>
-                            <CardTitle className="font-headline text-2xl">Existing Job Market</CardTitle>
-                             <CardDescription>Current industry demand and key responsibilities.</CardDescription>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                       <p className="text-muted-foreground">{data.existingJobMarket}</p>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader className="flex flex-row items-center gap-4">
-                        <DollarSign className="h-8 w-8 text-primary" />
-                        <div>
-                            <CardTitle className="font-headline text-2xl">Pay Scale</CardTitle>
-                            <CardDescription>Typical salary ranges based on experience.</CardDescription>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground">{data.payScale}</p>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader className="flex flex-row items-center gap-4">
-                        <Globe className="h-8 w-8 text-primary" />
-                        <div>
-                            <CardTitle className="font-headline text-2xl">National & International Opportunities</CardTitle>
-                            <CardDescription>Where this role is in high demand.</CardDescription>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                       <p className="text-muted-foreground">{data.globalOpportunities}</p>
-                    </CardContent>
-                </Card>
-            </main>
+    const chartConfig = {
+        entry: { label: "Entry-Level", color: "hsl(var(--chart-1))" },
+        mid: { label: "Mid-Level", color: "hsl(var(--chart-2))" },
+        senior: { label: "Senior-Level", color: "hsl(var(--chart-3))" },
+    };
+
+    const industryChartConfig = useMemo(() => {
+        const config: any = {};
+        data.existingJobMarket.industryDistribution.forEach((item, index) => {
+            config[item.name] = {
+                label: item.name,
+                color: `hsl(var(--chart-${index + 1}))`
+            }
+        });
+        return config;
+    }, [data.existingJobMarket.industryDistribution]);
+    
+    const COLORS = useMemo(() => data.existingJobMarket.industryDistribution.map((_, index) => `hsl(var(--chart-${index + 1}))`), [data.existingJobMarket.industryDistribution]);
+
+
+    return (
+        <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
+            <div className="max-w-6xl mx-auto">
+                <header className="mb-8">
+                    <Button variant="ghost" onClick={onBack} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4" />Back to Role Selection</Button>
+                    <h1 className="text-4xl font-headline font-bold text-slate-800">Career Opportunities: {role}</h1>
+                    <p className="text-muted-foreground mt-2">An AI-powered analysis of the job market and future trends for this role.</p>
+                </header>
+
+                <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                     <Card className="lg:col-span-2">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <TrendingUp className="h-8 w-8 text-primary" />
+                            <div>
+                                <CardTitle className="font-headline text-2xl">The Future Outlook</CardTitle>
+                                <CardDescription>Upcoming trends and the long-term trajectory for {role}s.</CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground">{data.upcomingOpportunities}</p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                         <CardHeader>
+                            <CardTitle className="font-headline text-2xl flex items-center gap-2"><DollarSign />Pay Scale Analysis</CardTitle>
+                            <CardDescription>{data.payScale.summary}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ChartContainer config={chartConfig} className="h-64 w-full">
+                                <RechartsBarChart 
+                                    data={payScaleData}
+                                    layout="vertical"
+                                    margin={{ left: 10, right: 10 }}
+                                >
+                                    <CartesianGrid horizontal={false} />
+                                    <XAxis type="number" dataKey="range.max" tickFormatter={(value) => `$${value/1000}k`} />
+                                    <YAxis type="category" dataKey="level" tickLine={false} axisLine={false} width={80} />
+                                    <RechartsTooltip 
+                                        cursor={{ fill: 'hsl(var(--muted))' }}
+                                        content={({ active, payload }) => {
+                                            if (active && payload && payload.length) {
+                                                const data = payload[0].payload;
+                                                return (
+                                                    <div className="p-2 bg-background border rounded-lg shadow-sm">
+                                                        <p className="font-bold">{data.level}</p>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            ${data.range.min.toLocaleString()} - ${data.range.max.toLocaleString()}
+                                                        </p>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                    <Bar dataKey="range.max" name="Max Salary" radius={4}>
+                                        {payScaleData.map((entry, index) => (
+                                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                                        ))}
+                                    </Bar>
+                                </RechartsBarChart>
+                            </ChartContainer>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                             <CardTitle className="font-headline text-2xl flex items-center gap-2"><PieChart />Job Market Distribution</CardTitle>
+                             <CardDescription>Top industries hiring for the "{role}" role.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex justify-center">
+                            <ChartContainer config={industryChartConfig} className="h-64 w-full">
+                                <RechartsPieChart>
+                                    <RechartsTooltip 
+                                        content={<ChartTooltipContent nameKey="name" />}
+                                    />
+                                    <Legend />
+                                    <Pie 
+                                        data={data.existingJobMarket.industryDistribution}
+                                        dataKey="value"
+                                        nameKey="name"
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={80}
+                                        labelLine={false}
+                                        label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+                                            const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                                            const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
+                                            const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
+                                            return (
+                                            <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-xs font-bold">
+                                                {`${(percent * 100).toFixed(0)}%`}
+                                            </text>
+                                            );
+                                        }}
+                                    >
+                                        {data.existingJobMarket.industryDistribution.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                </RechartsPieChart>
+                            </ChartContainer>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="font-headline text-2xl flex items-center gap-2"><Building />Current Market Overview</CardTitle>
+                            <CardDescription>A summary of today's job landscape.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                           <p className="text-muted-foreground">{data.existingJobMarket.summary}</p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                             <CardTitle className="font-headline text-2xl flex items-center gap-2"><Globe />Global Opportunities</CardTitle>
+                             <CardDescription>Where this role is in high demand across the world.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground mb-4">{data.globalOpportunities.summary}</p>
+                            <ul className="space-y-2">
+                                {data.globalOpportunities.topRegions.map(region => (
+                                    <li key={region.name} className="flex items-center justify-between p-2 bg-slate-100 rounded-md">
+                                        <div className="flex items-center gap-2">
+                                            <MapPin className="h-5 w-5 text-primary" />
+                                            <span className="font-semibold">{region.name}</span>
+                                        </div>
+                                        <Badge variant={region.demand === 'High' ? 'default' : 'secondary'}>{region.demand} Demand</Badge>
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
+
+                </main>
+            </div>
         </div>
-    </div>
-  );
+    );
+  }
 
   const RoleSelectionScreen = ({ role, onGenerateRoadmap, onExploreOpportunities, onBack }: { role: string; onGenerateRoadmap: () => void; onExploreOpportunities: () => void; onBack: () => void; }) => (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50/50">

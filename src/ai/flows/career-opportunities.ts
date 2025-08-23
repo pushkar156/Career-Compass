@@ -21,9 +21,28 @@ export type CareerOpportunitiesInput = z.infer<typeof CareerOpportunitiesInputSc
 
 const CareerOpportunitiesOutputSchema = z.object({
     upcomingOpportunities: z.string().describe("A summary of future trends, emerging technologies, and the long-term outlook for this career. Explain what will be in demand in the future."),
-    existingJobMarket: z.string().describe("An overview of the current job market, including the types of industries hiring for this role and key responsibilities."),
-    payScale: z.string().describe("General information on the typical salary range for this role, considering different levels of experience (entry-level, mid-level, senior). Provide a realistic range, not a single number."),
-    globalOpportunities: z.string().describe("An analysis of both national and international job opportunities, including key regions or countries where this role is in high demand."),
+    existingJobMarket: z.object({
+        summary: z.string().describe("An overview of the current job market, including the types of industries hiring for this role and key responsibilities."),
+        industryDistribution: z.array(z.object({
+            name: z.string().describe("The name of the industry."),
+            value: z.number().describe("The percentage of jobs in this industry for the role."),
+        })).describe("A breakdown of the top 5 industries hiring for this role by percentage. The percentages must sum to 100."),
+    }).describe("Details about the existing job market."),
+    payScale: z.object({
+        summary: z.string().describe("General information and context about the typical salary for this role, mentioning factors like location and skills."),
+        ranges: z.object({
+            entry: z.object({ min: z.number(), max: z.number() }).describe("The salary range for an entry-level position."),
+            mid: z.object({ min: z.number(), max: z.number() }).describe("The salary range for a mid-level position."),
+            senior: z.object({ min: z.number(), max: z.number() }).describe("The salary range for a senior-level position."),
+        }).describe("Salary ranges in USD, broken down by experience level."),
+    }).describe("Detailed pay scale information."),
+    globalOpportunities: z.object({
+        summary: z.string().describe("An analysis of both national and international job opportunities, including factors that influence international prospects."),
+        topRegions: z.array(z.object({
+            name: z.string().describe("The name of the country or region."),
+            demand: z.enum(['High', 'Medium', 'Low']).describe("The level of demand for the role in this region."),
+        })).describe("A list of up to 5 key regions or countries where this role is in high demand."),
+    }).describe("An analysis of job opportunities broken down by geography."),
 });
 export type CareerOpportunitiesOutput = z.infer<typeof CareerOpportunitiesOutputSchema>;
 
@@ -38,27 +57,24 @@ const careerOpportunitiesPrompt = ai.definePrompt({
   output: {schema: CareerOpportunitiesOutputSchema},
   prompt: `You are an expert AI career analyst. A user wants to understand the career landscape for a specific role: {{{specificRole}}}.
 
-Your task is to provide a comprehensive analysis covering four key areas. Your tone should be informative, realistic, and encouraging.
+Your task is to provide a comprehensive analysis with structured data. Your tone should be informative, realistic, and encouraging.
 
 1.  **Upcoming Opportunities (upcomingOpportunities):**
-    *   Analyze future trends and the long-term outlook for this role.
-    *   Discuss emerging technologies or skills that will be important.
+    *   Analyze future trends and the long-term outlook.
+    *   Discuss emerging technologies or skills.
     *   Provide insight into how the role is expected to evolve.
 
 2.  **Existing Job Market (existingJobMarket):**
-    *   Describe the current landscape for this role.
-    *   Mention the primary industries that hire for this position.
-    *   Summarize the core day-to-day responsibilities and common job requirements.
+    *   **summary:** Describe the current landscape, primary industries, and core responsibilities.
+    *   **industryDistribution:** Provide a list of the top 5 industries hiring for this role, with the percentage for each. The percentages **must** sum to 100.
 
 3.  **Pay Scale (payScale):**
-    *   Provide a realistic and general salary range for this career.
-    *   Break it down by experience level (e.g., Entry-Level, Mid-Level, Senior).
-    *   **IMPORTANT:** Do not give a single, definitive number. Instead, describe a typical range (e.g., "$50,000 to $70,000 for entry-level"). Frame this as an estimate that can vary by location, company, and skills.
+    *   **summary:** Provide context on salary variations based on location, company, and skills.
+    *   **ranges:** Provide realistic salary ranges in USD for entry, mid, and senior levels. Give a min and max for each.
 
 4.  **National & International Opportunities (globalOpportunities):**
-    *   Discuss the demand for this role both domestically and globally.
-    *   Highlight any key countries, regions, or cities where there is a high concentration of opportunities.
-    *   Mention any factors that might influence international prospects (e.g., language skills, visa requirements).
+    *   **summary:** Discuss the demand for this role both domestically and globally.
+    *   **topRegions:** List up to 5 key countries or regions and classify their demand as 'High', 'Medium', or 'Low'.
 
 Return the entire response in a single, valid JSON object that adheres to the defined output schema.`,
 });
