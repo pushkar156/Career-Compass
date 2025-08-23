@@ -32,6 +32,45 @@ const FormSchema = z.object({
 
 type UserInput = z.infer<typeof FormSchema>;
 
+const CareerExplorationResult = ({ data, userInput, onSelectRole, onReset }: { 
+      data: CareerExplorationOutput, 
+      userInput: UserInput, 
+      onSelectRole: (role: string) => void,
+      onReset: () => void 
+  }) => (
+      <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
+          <div className="max-w-4xl mx-auto">
+              <header className="mb-8">
+                  <Button variant="ghost" onClick={onReset} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Start a new search</Button>
+                  <h1 className="text-4xl font-headline font-bold text-slate-800">Explore: {userInput.desiredCareer}</h1>
+                  <p className="text-muted-foreground mt-2">{data.description}</p>
+              </header>
+
+              <main>
+                  <h2 className="text-2xl font-headline font-semibold text-slate-700 mb-4">Specific Roles & Specializations</h2>
+                  <p className="text-muted-foreground mb-6">
+                      This is your starting point. Select a role below to generate a detailed, step-by-step learning roadmap.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {data.specificRoles.map(role => (
+                          <Card key={role} className="hover:shadow-lg hover:border-primary transition-all cursor-pointer group" onClick={() => onSelectRole(role)}>
+                              <CardContent className="p-6 flex items-center justify-between">
+                                  <div className="flex items-center">
+                                      <div className="p-3 bg-primary/10 rounded-lg mr-4">
+                                          <GraduationCap className="h-6 w-6 text-primary" />
+                                      </div>
+                                      <h3 className="font-semibold text-base text-slate-800">{role}</h3>
+                                  </div>
+                                  <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                              </CardContent>
+                          </Card>
+                      ))}
+                  </div>
+              </main>
+          </div>
+      </div>
+  );
+
 export default function MainPage() {
   const [loading, setLoading] = useState(false);
   const [loadingStage, setLoadingStage] = useState<'exploring' | 'generating' | null>(null);
@@ -358,44 +397,6 @@ export default function MainPage() {
       </div>
   );
 
-  const CareerExplorationResult = ({ data, userInput, onSelectRole, onReset }: { 
-        data: CareerExplorationOutput, 
-        userInput: UserInput, 
-        onSelectRole: (role: string) => void,
-        onReset: () => void 
-    }) => (
-        <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
-            <div className="max-w-4xl mx-auto">
-                <header className="mb-8">
-                    <Button variant="ghost" onClick={onReset} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Start a new search</Button>
-                    <h1 className="text-4xl font-headline font-bold text-slate-800">Explore: {userInput.desiredCareer}</h1>
-                    <p className="text-muted-foreground mt-2">{data.description}</p>
-                </header>
-
-                <main>
-                    <h2 className="text-2xl font-headline font-semibold text-slate-700 mb-4">Specific Roles & Specializations</h2>
-                    <p className="text-muted-foreground mb-6">
-                        This is your starting point. Select a role below to generate a detailed, step-by-step learning roadmap.
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {data.specificRoles.map(role => (
-                            <Card key={role} className="hover:shadow-lg hover:border-primary transition-all cursor-pointer group" onClick={() => onSelectRole(role)}>
-                                <CardContent className="p-6 flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <div className="p-3 bg-primary/10 rounded-lg mr-4">
-                                            <GraduationCap className="h-6 w-6 text-primary" />
-                                        </div>
-                                        <h3 className="font-semibold text-base text-slate-800">{role}</h3>
-                                    </div>
-                                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                </main>
-            </div>
-        </div>
-    );
 
   return (
     <>
@@ -419,3 +420,5 @@ export default function MainPage() {
     </>
   );
 }
+
+    
