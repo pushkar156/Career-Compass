@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Progress } from '@/components/ui/progress';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
 
 import { Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 
@@ -26,6 +27,7 @@ const steps = [
     schema: z.object({
       name: z.string().min(2, 'Please enter your name.'),
     }),
+    defaultValues: { name: '' },
   },
   {
     icon: Search,
@@ -35,6 +37,7 @@ const steps = [
       careerGoal: z.string().min(3, 'Please describe your career goal.'),
       currentBackground: z.string().min(3, 'Tell us about your current background.'),
     }),
+    defaultValues: { careerGoal: '', currentBackground: '' },
   },
   {
     icon: Route,
@@ -44,6 +47,7 @@ const steps = [
       interests: z.string().min(5, 'Describe your key interests and hobbies.'),
       skills: z.string().min(5, 'What are some of your strongest skills?'),
     }),
+    defaultValues: { interests: '', skills: '' },
   },
   {
     icon: ListChecks,
@@ -53,6 +57,7 @@ const steps = [
       learningStyle: z.string().min(3, 'e.g., videos, articles, hands-on projects'),
       timeCommitment: z.string().min(2, 'e.g., 5 hours/week'),
     }),
+    defaultValues: { learningStyle: '', timeCommitment: '' },
   },
   {
     icon: CheckCircle,
@@ -61,6 +66,7 @@ const steps = [
     schema: z.object({
         confirmation: z.boolean().refine(val => val === true, { message: 'Please confirm to proceed.' })
     }),
+    defaultValues: { confirmation: false },
   },
 ];
 
@@ -80,8 +86,20 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
   const currentSchema = steps[currentStep].schema;
   const methods = useForm({
     resolver: zodResolver(currentSchema),
-    defaultValues: (formData as any)[`step${currentStep + 1}`] || {},
+    // Use the default values for the current step, pre-filled with any existing form data
+    defaultValues: {
+        ...steps[currentStep].defaultValues,
+        ...(formData as any)[`step${currentStep + 1}`],
+    },
   });
+
+  // Reset form with new default values when the step changes
+  useEffect(() => {
+    methods.reset({
+      ...steps[currentStep].defaultValues,
+      ...(formData as any)[`step${currentStep + 1}`],
+    });
+  }, [currentStep, methods, formData]);
 
 
   const handleNext = async () => {
@@ -97,17 +115,26 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
 
   const handleBack = () => {
     if (currentStep > 0) {
+      // Save current step's data before going back
+      const stepData = { [`step${currentStep + 1}`]: methods.getValues() };
+      setFormData(prev => ({ ...prev, ...stepData }));
       setCurrentStep(currentStep - 1);
     }
   };
   
-  const handleFormSubmit = () => {
+  const handleFormSubmit = async () => {
+     const isValid = await methods.trigger();
+     if (!isValid) return;
+
      const finalData = { ...formData, [`step${currentStep + 1}`]: methods.getValues() } as FormValues;
      onSubmit(finalData);
      onOpenChange(false);
      // Reset state for next time
-     setCurrentStep(0);
-     setFormData({});
+     setTimeout(() => {
+        setCurrentStep(0);
+        setFormData({});
+        methods.reset(steps[0].defaultValues);
+     }, 500);
   }
 
   const progress = ((currentStep + 1) / steps.length) * 100;
@@ -232,10 +259,10 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
                 render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
                         <FormControl>
-                            <input type="checkbox" checked={field.value} onChange={field.onChange} className="h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                            <Label>
+                            <Label htmlFor="confirmation">
                                I'm ready to generate my personalized career roadmap!
                             </Label>
                         </div>
@@ -251,7 +278,7 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-2xl p-0">
+      <SheetContent className="w-full sm:max-w-2xl p-0 flex flex-col" side="right">
         <FormProvider {...methods}>
           <form className="flex flex-col h-full" onSubmit={(e) => e.preventDefault()}>
             <SheetHeader className="p-6 border-b">
@@ -310,4 +337,3 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
     </Sheet>
   );
 }
-
