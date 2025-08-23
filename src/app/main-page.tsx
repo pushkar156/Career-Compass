@@ -542,7 +542,7 @@ export default function MainPage() {
                 </AvatarFallback>
               )}
             </Avatar>
-            <div className='flex-1'>
+            <div className='flex-1 min-w-0'>
                 <p className="text-sm font-medium leading-none truncate">{user?.displayName}</p>
                 <p className="text-xs leading-none text-muted-foreground truncate">{user?.email}</p>
             </div>
@@ -718,5 +718,7 @@ export default function MainPage() {
     </>
   );
 }
+
+    
 
     
