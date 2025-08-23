@@ -40,6 +40,12 @@ Your response must include two parts:
 1.  **Description (description):** A detailed but easy-to-understand summary of what the career field entails. Cover the main responsibilities, the industry landscape, and what makes the field unique.
 2.  **Specific Roles (specificRoles):** A list of distinct and concrete job titles or specializations that exist within this broader field. For example, if the user asks about "Marketing," you might list roles like "SEO Specialist," "Content Marketing Manager," "Social Media Manager," etc.
 
+**IMPORTANT:** If the user provides a very broad, general field (like "Designing," "Business," "Medicine," or "Art"), your primary goal for the \`specificRoles\` is to break that down into more specific, actionable career fields. For example:
+*   If the input is "Designing," the \`specificRoles\` should be a list like: ["Graphic Design", "UI/UX Design", "Interior Design", "Fashion Design", "Product Design"].
+*   If the input is "Business," the \`specificRoles\` should be a list like: ["Finance", "Marketing", "Human Resources", "Operations Management", "Entrepreneurship"].
+
+Only provide granular job titles if the user has already provided a sufficiently specific field (e.g., "Software Engineering").
+
 Return the entire response in a single, valid JSON object that adheres to the defined output schema.`,
 });
 
