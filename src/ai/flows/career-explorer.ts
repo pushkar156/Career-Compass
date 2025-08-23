@@ -13,12 +13,12 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const CareerExplorationInputSchema = z.object({
+const CareerExplorationInputSchema = z.object({
   career: z.string().describe('The general career field the user is interested in, e.g., "Software Engineering".'),
 });
 export type CareerExplorationInput = z.infer<typeof CareerExplorationInputSchema>;
 
-export const CareerExplorationOutputSchema = z.object({
+const CareerExplorationOutputSchema = z.object({
     description: z.string().describe("A detailed overview of the career field."),
     specificRoles: z.array(z.string()).describe("A list of specific, in-depth job titles or roles that exist within this career field."),
 });

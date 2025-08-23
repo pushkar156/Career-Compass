@@ -5,15 +5,16 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { generateCareerPathAction } from '@/app/actions';
+import { generateCareerPathAction, exploreCareerAction } from '@/app/actions';
 import type { CareerPathOutput } from '@/ai/flows/career-path-generator';
+import type { CareerExplorationOutput } from '@/ai/flows/career-explorer';
 import { CareerRoadmap } from '@/components/career-roadmap';
 import { useAuth } from '@/hooks/use-auth';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -33,7 +34,9 @@ type UserInput = z.infer<typeof FormSchema>;
 
 export default function MainPage() {
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<CareerPathOutput | null>(null);
+  const [loadingStage, setLoadingStage] = useState<'exploring' | 'generating' | null>(null);
+  const [explorationResult, setExplorationResult] = useState<CareerExplorationOutput | null>(null);
+  const [finalResult, setFinalResult] = useState<CareerPathOutput | null>(null);
   const [userInput, setUserInput] = useState<UserInput | null>(null);
   const { toast } = useToast();
   const { user, loading: authLoading, signOut } = useAuth();
@@ -49,19 +52,17 @@ export default function MainPage() {
     },
   });
 
-  async function onSubmit(data: UserInput) {
+  async function onExploreSubmit(data: UserInput) {
     setLoading(true);
-    setResult(null);
+    setLoadingStage('exploring');
+    setFinalResult(null);
+    setExplorationResult(null);
     setUserInput(data);
     try {
-      const response = await generateCareerPathAction({ 
-        career: data.desiredCareer, 
-        currentRole: data.currentRole, 
-        interests: data.interests 
-      });
+      const response = await exploreCareerAction({ career: data.desiredCareer });
 
       if (response.success) {
-        setResult(response.data);
+        setExplorationResult(response.data);
       } else {
         toast({
           variant: 'destructive',
@@ -73,19 +74,63 @@ export default function MainPage() {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'An unexpected error occurred. Please try again.',
+        description: 'An unexpected error occurred during exploration. Please try again.',
       });
     } finally {
       setLoading(false);
+      setLoadingStage(null);
+    }
+  }
+
+  async function onGenerateRoadmap(specificRole: string) {
+    if (!userInput) return;
+    setLoading(true);
+    setLoadingStage('generating');
+    setFinalResult(null);
+    
+    const updatedInput = { ...userInput, desiredCareer: specificRole };
+    setUserInput(updatedInput);
+
+    try {
+      const response = await generateCareerPathAction({ 
+        career: specificRole, 
+        currentRole: userInput.currentRole, 
+        interests: userInput.interests 
+      });
+
+      if (response.success) {
+        setFinalResult(response.data);
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: response.error,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'An unexpected error occurred while generating the roadmap. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+      setLoadingStage(null);
     }
   }
   
   const handleReset = () => {
-    setResult(null);
+    setFinalResult(null);
+    setExplorationResult(null);
     setUserInput(null);
     setUserPath(null);
     form.reset();
   };
+  
+  const handleBackToExplore = () => {
+      setFinalResult(null);
+      setExplorationResult(null);
+  }
 
   const handleQuestionnaireSubmit = (data: any) => {
     console.log('Questionnaire submitted:', data);
@@ -94,7 +139,7 @@ export default function MainPage() {
       currentRole: data.step2.currentBackground,
       interests: `${data.step3.interests}, ${data.step3.skills}`,
     }
-    onSubmit(mappedData);
+    onExploreSubmit(mappedData);
   }
 
   if (authLoading) {
@@ -111,14 +156,30 @@ export default function MainPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <h1 className="text-2xl font-headline text-primary-foreground font-semibold">Generating your future...</h1>
-        <p className="text-muted-foreground mt-2">Our AI is charting the course for your new career. Hang tight!</p>
+        <h1 className="text-2xl font-headline text-primary-foreground font-semibold">
+          {loadingStage === 'exploring' ? 'Exploring possibilities...' : 'Generating your future...'}
+        </h1>
+        <p className="text-muted-foreground mt-2">
+            {loadingStage === 'exploring' 
+                ? 'Our AI is analyzing the career field for you.' 
+                : 'Our AI is charting the course for your new career. Hang tight!'
+            }
+        </p>
       </div>
     );
   }
 
-  if (result && userInput) {
-    return <CareerRoadmap data={result} userInput={userInput} onReset={handleReset} />;
+  if (finalResult && userInput) {
+    return <CareerRoadmap data={finalResult} userInput={userInput} onReset={handleReset} />;
+  }
+
+  if (explorationResult && userInput) {
+    return <CareerExplorationResult 
+                data={explorationResult} 
+                userInput={userInput}
+                onSelectRole={onGenerateRoadmap}
+                onReset={handleBackToExplore}
+            />;
   }
   
   const UserMenu = () => (
@@ -213,7 +274,7 @@ export default function MainPage() {
             </CardHeader>
             <CardContent>
                 <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onExploreSubmit)} className="space-y-6">
                     <FormField
                     control={form.control}
                     name="desiredCareer"
@@ -263,7 +324,7 @@ export default function MainPage() {
                     />
                     </div>
                     <Button type="submit" className="w-full !mt-8" size="lg" disabled={loading}>
-                    Generate My Roadmap
+                    Explore Career
                     </Button>
                 </form>
                 </Form>
@@ -271,7 +332,7 @@ export default function MainPage() {
         </Card>
     </div>
   );
-
+  
   const ExplorationPath = () => (
      <div className="w-full max-w-4xl mx-auto text-center">
         <Button variant="ghost" onClick={() => setUserPath(null)} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Back to choices</Button>
@@ -297,6 +358,45 @@ export default function MainPage() {
       </div>
   );
 
+  const CareerExplorationResult = ({ data, userInput, onSelectRole, onReset }: { 
+        data: CareerExplorationOutput, 
+        userInput: UserInput, 
+        onSelectRole: (role: string) => void,
+        onReset: () => void 
+    }) => (
+        <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
+            <div className="max-w-4xl mx-auto">
+                <header className="mb-8">
+                    <Button variant="ghost" onClick={onReset} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Start a new search</Button>
+                    <h1 className="text-4xl font-headline font-bold text-slate-800">Explore: {userInput.desiredCareer}</h1>
+                    <p className="text-muted-foreground mt-2">{data.description}</p>
+                </header>
+
+                <main>
+                    <h2 className="text-2xl font-headline font-semibold text-slate-700 mb-4">Specific Roles & Specializations</h2>
+                    <p className="text-muted-foreground mb-6">
+                        This is your starting point. Select a role below to generate a detailed, step-by-step learning roadmap.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {data.specificRoles.map(role => (
+                            <Card key={role} className="hover:shadow-lg hover:border-primary transition-all cursor-pointer group" onClick={() => onSelectRole(role)}>
+                                <CardContent className="p-6 flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <div className="p-3 bg-primary/10 rounded-lg mr-4">
+                                            <GraduationCap className="h-6 w-6 text-primary" />
+                                        </div>
+                                        <h3 className="font-semibold text-base text-slate-800">{role}</h3>
+                                    </div>
+                                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </main>
+            </div>
+        </div>
+    );
+
   return (
     <>
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50/50">
@@ -319,4 +419,3 @@ export default function MainPage() {
     </>
   );
 }
- 
