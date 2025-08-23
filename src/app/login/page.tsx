@@ -216,10 +216,10 @@ export default function LoginPage() {
       <div className="w-full max-w-md mx-auto">
         <div className="text-center mb-8">
           <Compass className="h-12 w-12 text-primary mx-auto mb-4" />
-          <h1 className="text-5xl font-headline font-bold text-slate-800">Career Compass</h1>
+          <h1 className="text-5xl font-headline font-bold text-slate-800 dark:text-slate-200">Career Compass</h1>
           <p className="mt-3 text-lg text-muted-foreground">Sign in to continue your journey</p>
         </div>
-        <Card className="shadow-2xl shadow-slate-200">
+        <Card className="shadow-lg shadow-slate-200/50 dark:shadow-black/20">
           <CardHeader>
             <CardTitle className="font-headline text-2xl text-center">Welcome Back</CardTitle>
             <CardDescription className="text-center">Choose your sign-in method</CardDescription>
@@ -324,4 +324,5 @@ declare global {
   }
 }
 
+    
     
