@@ -5,9 +5,9 @@ import { useState, useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building, MapPin, BarChart, PieChart } from 'lucide-react';
+import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building, MapPin, BarChart, PieChart, Moon, Sun } from 'lucide-react';
 import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
-
+import { useTheme } from "next-themes"
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -25,6 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { InteractiveQuestionnaire } from '@/components/interactive-questionnaire';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 
 const FormSchema = z.object({
@@ -65,16 +66,16 @@ export default function MainPage() {
       onSelectRole: (role: string) => void,
       onReset: () => void 
   }) => (
-      <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-6 md:p-10">
           <div className="max-w-4xl mx-auto">
               <header className="mb-8">
                   <Button variant="ghost" onClick={onReset} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Start a new search</Button>
-                  <h1 className="text-4xl font-headline font-bold text-slate-800">Explore: {userInput.desiredCareer}</h1>
+                  <h1 className="text-4xl font-headline font-bold">Explore: {userInput.desiredCareer}</h1>
                   <p className="text-muted-foreground mt-2">{data.description}</p>
               </header>
 
               <main>
-                  <h2 className="text-2xl font-headline font-semibold text-slate-700 mb-4">Specific Roles & Specializations</h2>
+                  <h2 className="text-2xl font-headline font-semibold mb-4">Specific Roles & Specializations</h2>
                   <p className="text-muted-foreground mb-6">
                       This is your starting point. Select a role below to generate a detailed, step-by-step learning roadmap.
                   </p>
@@ -86,7 +87,7 @@ export default function MainPage() {
                                       <div className="p-3 bg-primary/10 rounded-lg mr-4">
                                           <GraduationCap className="h-6 w-6 text-primary" />
                                       </div>
-                                      <h3 className="font-semibold text-base text-slate-800">{role}</h3>
+                                      <h3 className="font-semibold text-base">{role}</h3>
                                   </div>
                                   <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                               </CardContent>
@@ -100,9 +101,9 @@ export default function MainPage() {
 
   const CareerOpportunitiesResult = ({ data, role, onBack }: { data: CareerOpportunitiesOutput, role: string, onBack: () => void }) => {
     const payScaleData = useMemo(() => [
-        { level: 'Entry-Level', range: data.payScale.ranges.entry, fill: "var(--color-entry)" },
-        { level: 'Mid-Level', range: data.payScale.ranges.mid, fill: "var(--color-mid)" },
-        { level: 'Senior-Level', range: data.payScale.ranges.senior, fill: "var(--color-senior)" },
+        { level: 'Entry-Level', range: data.payScale.ranges.entry, fill: "hsl(var(--chart-1))" },
+        { level: 'Mid-Level', range: data.payScale.ranges.mid, fill: "hsl(var(--chart-2))" },
+        { level: 'Senior-Level', range: data.payScale.ranges.senior, fill: "hsl(var(--chart-3))" },
     ], [data.payScale.ranges]);
 
     const chartConfig = {
@@ -126,11 +127,11 @@ export default function MainPage() {
 
 
     return (
-        <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-6 md:p-10">
             <div className="max-w-6xl mx-auto">
                 <header className="mb-8">
                     <Button variant="ghost" onClick={onBack} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4" />Back to Role Selection</Button>
-                    <h1 className="text-4xl font-headline font-bold text-slate-800">Career Opportunities: {role}</h1>
+                    <h1 className="text-4xl font-headline font-bold">Career Opportunities: {role}</h1>
                     <p className="text-muted-foreground mt-2">An AI-powered analysis of the job market and future trends for this role.</p>
                 </header>
 
@@ -249,7 +250,7 @@ export default function MainPage() {
                             <p className="text-muted-foreground mb-4">{data.globalOpportunities.summary}</p>
                             <ul className="space-y-2">
                                 {data.globalOpportunities.topRegions.map(region => (
-                                    <li key={region.name} className="flex items-center justify-between p-2 bg-slate-100 rounded-md">
+                                    <li key={region.name} className="flex items-center justify-between p-2 bg-slate-100 dark:bg-slate-800 rounded-md">
                                         <div className="flex items-center gap-2">
                                             <MapPin className="h-5 w-5 text-primary" />
                                             <span className="font-semibold">{region.name}</span>
@@ -268,15 +269,15 @@ export default function MainPage() {
   }
 
   const RoleSelectionScreen = ({ role, onGenerateRoadmap, onExploreOpportunities, onBack }: { role: string; onGenerateRoadmap: () => void; onExploreOpportunities: () => void; onBack: () => void; }) => (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50/50">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50/50 dark:bg-background">
         <div className="w-full max-w-4xl mx-auto text-center">
             <Button variant="ghost" onClick={onBack} className="absolute top-6 left-6"><ArrowLeft className="mr-2 h-4 w-4"/>Back to exploration</Button>
             <div className="text-center mb-10">
-                <h1 className="text-5xl font-headline font-bold text-slate-800">You've selected: {role}</h1>
+                <h1 className="text-5xl font-headline font-bold">You've selected: {role}</h1>
                 <p className="mt-4 text-lg text-muted-foreground">What would you like to do next?</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card className="shadow-2xl shadow-slate-200 text-center p-8 hover:shadow-primary/20 transition-shadow">
+                <Card className="shadow-2xl shadow-slate-200 dark:shadow-black/20 text-center p-8 hover:shadow-primary/20 transition-shadow">
                     <CardHeader>
                         <Route className="h-12 w-12 text-primary mx-auto mb-4" />
                         <CardTitle className="font-headline text-3xl">Custom Roadmap</CardTitle>
@@ -291,7 +292,7 @@ export default function MainPage() {
                         </Button>
                     </CardContent>
                 </Card>
-                <Card className="shadow-2xl shadow-slate-200 text-center p-8 hover:shadow-primary/20 transition-shadow">
+                <Card className="shadow-2xl shadow-slate-200 dark:shadow-black/20 text-center p-8 hover:shadow-primary/20 transition-shadow">
                     <CardHeader>
                         <TrendingUp className="h-12 w-12 text-primary mx-auto mb-4" />
                         <CardTitle className="font-headline text-3xl">Explore Opportunities</CardTitle>
@@ -444,7 +445,7 @@ export default function MainPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <h1 className="text-2xl font-headline text-primary-foreground font-semibold">Authenticating...</h1>
+        <h1 className="text-2xl font-headline font-semibold">Authenticating...</h1>
         <p className="text-muted-foreground mt-2">Just a moment, we're checking your credentials.</p>
       </div>
     );
@@ -458,7 +459,7 @@ export default function MainPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <h1 className="text-2xl font-headline text-primary-foreground font-semibold">
+        <h1 className="text-2xl font-headline font-semibold">
           {loadingStage === 'exploring' && 'Exploring possibilities...'}
           {loadingStage === 'generating' && 'Generating your future...'}
           {loadingStage === 'fetching_opportunities' && 'Gathering Insights...'}
@@ -489,6 +490,32 @@ export default function MainPage() {
             />;
   }
   
+  const ThemeToggle = () => {
+    const { setTheme } = useTheme()
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    <span className="sr-only">Toggle theme</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setTheme("light")}>
+                    Light
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    Dark
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("system")}>
+                    System
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+  }
+
   const UserMenu = () => (
     <Popover>
       <PopoverTrigger asChild>
@@ -520,10 +547,13 @@ export default function MainPage() {
                 <p className="text-xs leading-none text-muted-foreground truncate">{user?.email}</p>
             </div>
         </div>
-        <Button variant="ghost" className="w-full justify-start mt-2" onClick={signOut}>
-          <LogOut className="mr-2 h-4 w-4" />
-          Log out
-        </Button>
+        <div className="flex items-center justify-between mt-2">
+          <Button variant="ghost" className="w-full justify-start" onClick={signOut}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Log out
+          </Button>
+          <ThemeToggle />
+        </div>
       </PopoverContent>
     </Popover>
   );
@@ -531,13 +561,13 @@ export default function MainPage() {
   const PathSelection = () => (
     <div className="w-full max-w-4xl mx-auto">
         <div className="text-center mb-10">
-            <h1 className="text-5xl font-headline font-bold text-slate-800">Welcome, {user?.displayName || 'Explorer'}!</h1>
+            <h1 className="text-5xl font-headline font-bold">Welcome, {user?.displayName || 'Explorer'}!</h1>
             <p className="mt-4 text-lg text-muted-foreground">
                 How would you like to start your journey today?
             </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="shadow-2xl shadow-slate-200 text-center p-8 hover:shadow-primary/20 transition-shadow">
+            <Card className="shadow-2xl shadow-slate-200 dark:shadow-black/20 text-center p-8 hover:shadow-primary/20 transition-shadow">
                 <CardHeader>
                     <Search className="h-12 w-12 text-primary mx-auto mb-4" />
                     <CardTitle className="font-headline text-3xl">Explore Career Options</CardTitle>
@@ -552,7 +582,7 @@ export default function MainPage() {
                     </Button>
                 </CardContent>
             </Card>
-            <Card className="shadow-2xl shadow-slate-200 text-center p-8 hover:shadow-primary/20 transition-shadow">
+            <Card className="shadow-2xl shadow-slate-200 dark:shadow-black/20 text-center p-8 hover:shadow-primary/20 transition-shadow">
                 <CardHeader>
                     <Route className="h-12 w-12 text-primary mx-auto mb-4" />
                     <CardTitle className="font-headline text-3xl">I Know My Path</CardTitle>
@@ -574,7 +604,7 @@ export default function MainPage() {
   const DirectInputPath = () => (
     <div className="w-full max-w-2xl mx-auto">
         <Button variant="ghost" onClick={() => setUserPath(null)} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Back to choices</Button>
-        <Card className="shadow-2xl shadow-slate-200">
+        <Card className="shadow-2xl shadow-slate-200 dark:shadow-black/20">
             <CardHeader>
                 <CardTitle className="font-headline text-2xl text-center">Chart Your Course</CardTitle>
                 <CardDescription className="text-center">Tell us your goal, and we'll build the roadmap.</CardDescription>
@@ -644,10 +674,10 @@ export default function MainPage() {
      <div className="w-full max-w-4xl mx-auto text-center">
         <Button variant="ghost" onClick={() => setUserPath(null)} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Back to choices</Button>
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-headline font-bold text-slate-800">Your Guided Journey</h2>
+          <h2 className="text-4xl font-headline font-bold">Your Guided Journey</h2>
           <p className="mt-4 text-lg text-muted-foreground">Answer a few questions to build a hyper-personalized career plan.</p>
         </div>
-        <Card className="shadow-2xl shadow-slate-200 text-center p-8">
+        <Card className="shadow-2xl shadow-slate-200 dark:shadow-black/20 text-center p-8">
             <CardHeader>
                 <Handshake className="h-12 w-12 text-primary mx-auto mb-4" />
                 <CardTitle className="font-headline text-3xl">Let's Get to Know You</CardTitle>
@@ -668,7 +698,7 @@ export default function MainPage() {
 
   return (
     <>
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50/50">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50/50 dark:bg-background">
         <div className="absolute top-4 right-4">
             {user && <UserMenu />}
         </div>

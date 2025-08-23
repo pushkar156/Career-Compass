@@ -77,7 +77,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
   };
 
   const renderKnowledgeAreaCheckbox = (area: string, index: number) => (
-    <div key={index} className="flex items-center space-x-3 bg-slate-50 p-3 rounded-md">
+    <div key={index} className="flex items-center space-x-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-md">
       <Checkbox
         id={`task-${area}-${index}`}
         checked={completedTasks.includes(area)}
@@ -95,11 +95,11 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
   const getBadgeForCost = (cost: Tool['cost']) => {
     switch (cost) {
       case 'Free':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">{cost}</Badge>;
+        return <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700">{cost}</Badge>;
       case 'Paid':
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">{cost}</Badge>;
+        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-700">{cost}</Badge>;
       case 'Freemium':
-        return <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">{cost}</Badge>;
+        return <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/50 dark:text-purple-300 dark:border-purple-700">{cost}</Badge>;
       default:
         return <Badge variant="outline">{cost}</Badge>;
     }
@@ -107,11 +107,11 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
 
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl mx-auto">
         <header className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-headline font-bold text-slate-800">Your Custom Roadmap</h1>
+            <h1 className="text-4xl font-headline font-bold">Your Custom Roadmap</h1>
             <p className="text-muted-foreground">AI-generated guide for becoming a {userInput.desiredCareer}</p>
           </div>
           <Button variant="outline" onClick={onReset}>
@@ -263,7 +263,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                   <CardContent>
                     <Accordion type="single" collapsible className="w-full space-y-2">
                       {(data.resources || []).map((resource, index) => (
-                        <AccordionItem value={`item-${index}`} key={index} className="bg-slate-50 rounded-md px-4 border">
+                        <AccordionItem value={`item-${index}`} key={index} className="bg-slate-100 dark:bg-slate-800/50 rounded-md px-4 border">
                           <AccordionTrigger className="py-3 hover:no-underline">
                             <div className="flex items-center text-left">
                               {getIconForResource(resource.type)}
@@ -315,7 +315,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                   <CardContent>
                      <ul className="space-y-3">
                       {(data.tools || []).map((tool, index) => (
-                        <li key={index} className="p-4 bg-slate-50 rounded-md border">
+                        <li key={index} className="p-4 bg-slate-100 dark:bg-slate-800/50 rounded-md border">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center">
                                 <Wrench className="h-5 w-5 text-primary mr-3" />
