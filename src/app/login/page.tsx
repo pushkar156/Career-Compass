@@ -166,7 +166,14 @@ export default function LoginPage() {
   
   const handleEmailSignUp = async () => {
     const isValid = await emailForm.trigger();
-    if (!isValid) return;
+    if (!isValid) {
+        toast({
+            variant: 'destructive',
+            title: 'Invalid Input',
+            description: 'Please check your email and password.',
+        });
+        return;
+    }
     const data = emailForm.getValues();
     setLoading(true);
     try {
@@ -219,7 +226,7 @@ export default function LoginPage() {
           <h1 className="text-5xl font-headline font-bold text-slate-800 dark:text-slate-200">Career Compass</h1>
           <p className="mt-3 text-lg text-muted-foreground">Sign in to continue your journey</p>
         </div>
-        <Card className="shadow-lg shadow-slate-200/50 dark:shadow-black/20">
+        <Card className="shadow-lg shadow-slate-200/20 dark:shadow-black/20">
           <CardHeader>
             <CardTitle className="font-headline text-2xl text-center">Welcome Back</CardTitle>
             <CardDescription className="text-center">Choose your sign-in method</CardDescription>
@@ -323,6 +330,3 @@ declare global {
     recaptchaVerifier?: RecaptchaVerifier;
   }
 }
-
-    
-    
