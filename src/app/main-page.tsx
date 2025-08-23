@@ -5,7 +5,7 @@ import { useState, useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building, MapPin, BarChart, PieChart, Moon, Sun } from 'lucide-react';
+import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building, MapPin, BarChart, PieChart, Moon, Sun, Check } from 'lucide-react';
 import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { useTheme } from "next-themes"
 
@@ -145,7 +145,14 @@ export default function MainPage() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-muted-foreground">{data.upcomingOpportunities}</p>
+                             <ul className="space-y-3">
+                                {data.upcomingOpportunities.map((point, index) => (
+                                    <li key={index} className="flex items-start gap-3">
+                                        <CheckCircle className="h-5 w-5 text-green-500 mt-1 shrink-0" />
+                                        <span className="text-muted-foreground">{point}</span>
+                                    </li>
+                                ))}
+                            </ul>
                         </CardContent>
                     </Card>
 
@@ -237,7 +244,14 @@ export default function MainPage() {
                             <CardDescription>A summary of today's job landscape.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                           <p className="text-muted-foreground">{data.existingJobMarket.summary}</p>
+                           <ul className="space-y-3">
+                                {data.existingJobMarket.summary.map((point, index) => (
+                                    <li key={index} className="flex items-start gap-3">
+                                        <Check className="h-5 w-5 text-primary mt-1 shrink-0" />
+                                        <span className="text-muted-foreground">{point}</span>
+                                    </li>
+                                ))}
+                            </ul>
                         </CardContent>
                     </Card>
 

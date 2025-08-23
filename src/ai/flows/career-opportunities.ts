@@ -20,9 +20,9 @@ export type CareerOpportunitiesInput = z.infer<typeof CareerOpportunitiesInputSc
 
 
 const CareerOpportunitiesOutputSchema = z.object({
-    upcomingOpportunities: z.string().describe("A summary of future trends, emerging technologies, and the long-term outlook for this career. Explain what will be in demand in the future."),
+    upcomingOpportunities: z.array(z.string()).describe("A list of bullet points summarizing future trends, emerging technologies, and the long-term outlook for this career."),
     existingJobMarket: z.object({
-        summary: z.string().describe("An overview of the current job market, including the types of industries hiring for this role and key responsibilities."),
+        summary: z.array(z.string()).describe("A list of bullet points providing an overview of the current job market, including the types of industries hiring for this role and key responsibilities."),
         industryDistribution: z.array(z.object({
             name: z.string().describe("The name of the industry."),
             value: z.number().describe("The percentage of jobs in this industry for the role."),
@@ -63,9 +63,10 @@ Your task is to provide a comprehensive analysis with structured data. Your tone
     *   Analyze future trends and the long-term outlook.
     *   Discuss emerging technologies or skills.
     *   Provide insight into how the role is expected to evolve.
+    *   **Format this as a list of bullet points.**
 
 2.  **Existing Job Market (existingJobMarket):**
-    *   **summary:** Describe the current landscape, primary industries, and core responsibilities.
+    *   **summary:** Describe the current landscape, primary industries, and core responsibilities **as a list of bullet points.**
     *   **industryDistribution:** Provide a list of the top 5 industries hiring for this role, with the percentage for each. The percentages **must** sum to 100.
 
 3.  **Pay Scale (payScale):**
