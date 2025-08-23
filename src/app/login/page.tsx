@@ -12,6 +12,7 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  updateProfile,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   type ConfirmationResult,
@@ -23,7 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Compass, Mail, KeyRound, LogIn, Phone, MessageSquare } from 'lucide-react';
+import { Compass, Mail, KeyRound, LogIn, Phone, MessageSquare, User } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -31,11 +32,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-const emailPasswordSchema = z.object({
+const signInSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
-type EmailPasswordForm = z.infer<typeof emailPasswordSchema>;
+type SignInForm = z.infer<typeof signInSchema>;
+
+const signUpSchema = z.object({
+  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
+  email: z.string().email({ message: 'Invalid email address.' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+});
+type SignUpForm = z.infer<typeof signUpSchema>;
+
 
 const phoneSchema = z.object({
   phone: z.string().regex(/^\+[1-9]\d{1,14}$/, 'Please enter a valid phone number with country code (e.g., +12223334444).'),
@@ -60,20 +73,27 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
   const [phoneSignInStep, setPhoneSignInStep] = useState<'entry' | 'verify'>('entry');
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
-  // Use useEffect to ensure this runs only on the client side
   useEffect(() => {
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-      'size': 'invisible',
-      'callback': (response: any) => {
-        // reCAPTCHA solved, allow signInWithPhoneNumber.
-      },
-    });
+    try {
+        if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+              'size': 'invisible',
+              'callback': (response: any) => {
+                // reCAPTCHA solved, allow signInWithPhoneNumber.
+              },
+            });
+        }
+    } catch (e) {
+        console.error("Error initializing reCAPTCHA", e);
+    }
   }, []);
+
 
   const setupRecaptcha = () => {
     return window.recaptchaVerifier!;
@@ -137,9 +157,14 @@ export default function LoginPage() {
     }
   };
 
-  const emailForm = useForm<EmailPasswordForm>({
-    resolver: zodResolver(emailPasswordSchema),
+  const signInForm = useForm<SignInForm>({
+    resolver: zodResolver(signInSchema),
     defaultValues: { email: '', password: '' },
+  });
+
+  const signUpForm = useForm<SignUpForm>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
   });
 
   const phoneForm = useForm<PhoneForm>({
@@ -152,7 +177,7 @@ export default function LoginPage() {
     defaultValues: { code: '' },
   });
 
-  const handleEmailSignIn = async (data: EmailPasswordForm) => {
+  const handleEmailSignIn = async (data: SignInForm) => {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
@@ -164,20 +189,11 @@ export default function LoginPage() {
     }
   };
   
-  const handleEmailSignUp = async () => {
-    const isValid = await emailForm.trigger();
-    if (!isValid) {
-        toast({
-            variant: 'destructive',
-            title: 'Invalid Input',
-            description: 'Please check your email and password.',
-        });
-        return;
-    }
-    const data = emailForm.getValues();
+  const handleEmailSignUp = async (data: SignUpForm) => {
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      await updateProfile(userCredential.user, { displayName: data.name });
       router.push('/');
     } catch (error: any) {
       handleAuthError(error);
@@ -217,6 +233,82 @@ export default function LoginPage() {
     }
   }
 
+  const SignInContent = () => (
+    <form onSubmit={signInForm.handleSubmit(handleEmailSignIn)} className="space-y-4">
+        <div className="space-y-2">
+            <Label htmlFor="email-signin">Email</Label>
+            <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input id="email-signin" type="email" placeholder="you@example.com" {...signInForm.register('email')} className="pl-10" />
+            </div>
+            {signInForm.formState.errors.email && <p className="text-xs text-destructive">{signInForm.formState.errors.email.message}</p>}
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="password-signin">Password</Label>
+            <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input id="password-signin" type="password" placeholder="••••••••" {...signInForm.register('password')} className="pl-10" />
+            </div>
+            {signInForm.formState.errors.password && <p className="text-xs text-destructive">{signInForm.formState.errors.password.message}</p>}
+        </div>
+        <div className="flex flex-col gap-2 pt-2">
+            <Button type="submit" className="w-full" disabled={loading}>
+                <LogIn className="mr-2" /> Sign In
+            </Button>
+             <p className="text-center text-sm text-muted-foreground">
+                Don't have an account?{' '}
+                <Button variant="link" type="button" onClick={() => setIsSigningUp(true)} className="p-0 h-auto">Sign up</Button>
+            </p>
+        </div>
+    </form>
+  );
+
+  const SignUpContent = () => (
+     <form onSubmit={signUpForm.handleSubmit(handleEmailSignUp)} className="space-y-4">
+        <div className="space-y-2">
+            <Label htmlFor="name-signup">Full Name</Label>
+            <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input id="name-signup" type="text" placeholder="John Doe" {...signUpForm.register('name')} className="pl-10" />
+            </div>
+            {signUpForm.formState.errors.name && <p className="text-xs text-destructive">{signUpForm.formState.errors.name.message}</p>}
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="email-signup">Email</Label>
+            <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input id="email-signup" type="email" placeholder="you@example.com" {...signUpForm.register('email')} className="pl-10" />
+            </div>
+            {signUpForm.formState.errors.email && <p className="text-xs text-destructive">{signUpForm.formState.errors.email.message}</p>}
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="password-signup">Password</Label>
+            <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input id="password-signup" type="password" placeholder="••••••••" {...signUpForm.register('password')} className="pl-10" />
+            </div>
+            {signUpForm.formState.errors.password && <p className="text-xs text-destructive">{signUpForm.formState.errors.password.message}</p>}
+        </div>
+         <div className="space-y-2">
+            <Label htmlFor="confirmPassword-signup">Confirm Password</Label>
+            <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input id="confirmPassword-signup" type="password" placeholder="••••••••" {...signUpForm.register('confirmPassword')} className="pl-10" />
+            </div>
+            {signUpForm.formState.errors.confirmPassword && <p className="text-xs text-destructive">{signUpForm.formState.errors.confirmPassword.message}</p>}
+        </div>
+        <div className="flex flex-col gap-2 pt-2">
+            <Button type="submit" className="w-full" disabled={loading}>
+                Create Account
+            </Button>
+             <p className="text-center text-sm text-muted-foreground">
+                Already have an account?{' '}
+                <Button variant="link" type="button" onClick={() => setIsSigningUp(false)} className="p-0 h-auto">Sign in</Button>
+            </p>
+        </div>
+    </form>
+  );
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <div id="recaptcha-container"></div>
@@ -228,8 +320,8 @@ export default function LoginPage() {
         </div>
         <Card className="shadow-lg shadow-slate-200/20 dark:shadow-black/20">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl text-center">Welcome Back</CardTitle>
-            <CardDescription className="text-center">Choose your sign-in method</CardDescription>
+            <CardTitle className="font-headline text-2xl text-center">{isSigningUp ? 'Create an Account' : 'Welcome Back'}</CardTitle>
+            <CardDescription className="text-center">{isSigningUp ? 'Enter your details to get started.' : 'Choose your sign-in method'}</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="email" className="w-full">
@@ -238,33 +330,7 @@ export default function LoginPage() {
                 <TabsTrigger value="phone">Phone</TabsTrigger>
               </TabsList>
               <TabsContent value="email" className="pt-6">
-                {/* Email Form */}
-                <form onSubmit={emailForm.handleSubmit(handleEmailSignIn)} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input id="email" type="email" placeholder="you@example.com" {...emailForm.register('email')} className="pl-10" />
-                    </div>
-                    {emailForm.formState.errors.email && <p className="text-xs text-destructive">{emailForm.formState.errors.email.message}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <div className="relative">
-                      <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input id="password" type="password" placeholder="••••••••" {...emailForm.register('password')} className="pl-10" />
-                    </div>
-                    {emailForm.formState.errors.password && <p className="text-xs text-destructive">{emailForm.formState.errors.password.message}</p>}
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                    <Button type="submit" className="w-full" disabled={loading}>
-                      <LogIn className="mr-2" /> Sign In
-                    </Button>
-                    <Button type="button" variant="outline" className="w-full" onClick={handleEmailSignUp} disabled={loading}>
-                      Sign Up
-                    </Button>
-                  </div>
-                </form>
+                {isSigningUp ? <SignUpContent /> : <SignInContent />}
                 
                 <div className="relative my-6">
                   <div className="absolute inset-0 flex items-center">
