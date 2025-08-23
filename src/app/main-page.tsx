@@ -5,16 +5,17 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap } from 'lucide-react';
+import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { generateCareerPathAction, exploreCareerAction } from '@/app/actions';
+import { generateCareerPathAction, exploreCareerAction, getCareerOpportunitiesAction } from '@/app/actions';
 import type { CareerPathOutput } from '@/ai/flows/career-path-generator';
 import type { CareerExplorationOutput } from '@/ai/flows/career-explorer';
+import type { CareerOpportunitiesOutput } from '@/ai/flows/career-opportunities';
 import { CareerRoadmap } from '@/components/career-roadmap';
 import { useAuth } from '@/hooks/use-auth';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -71,12 +72,77 @@ const CareerExplorationResult = ({ data, userInput, onSelectRole, onReset }: {
       </div>
   );
 
+const CareerOpportunitiesResult = ({ data, role, onBack }: { data: CareerOpportunitiesOutput, role: string, onBack: () => void }) => (
+    <div className="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-10">
+        <div className="max-w-4xl mx-auto">
+            <header className="mb-8">
+                <Button variant="ghost" onClick={onBack} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Back to Role Selection</Button>
+                <h1 className="text-4xl font-headline font-bold text-slate-800">Career Opportunities: {role}</h1>
+                <p className="text-muted-foreground mt-2">An AI-powered analysis of the job market and future trends for this role.</p>
+            </header>
+
+            <main className="space-y-6">
+                <Card>
+                    <CardHeader className="flex flex-row items-center gap-4">
+                        <TrendingUp className="h-8 w-8 text-primary" />
+                        <div>
+                            <CardTitle className="font-headline text-2xl">Upcoming Opportunities</CardTitle>
+                            <CardDescription>Future trends and the long-term outlook.</CardDescription>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground">{data.upcomingOpportunities}</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center gap-4">
+                        <Building className="h-8 w-8 text-primary" />
+                        <div>
+                            <CardTitle className="font-headline text-2xl">Existing Job Market</CardTitle>
+                             <CardDescription>Current industry demand and key responsibilities.</CardDescription>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                       <p className="text-muted-foreground">{data.existingJobMarket}</p>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center gap-4">
+                        <DollarSign className="h-8 w-8 text-primary" />
+                        <div>
+                            <CardTitle className="font-headline text-2xl">Pay Scale</CardTitle>
+                            <CardDescription>Typical salary ranges based on experience.</CardDescription>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground">{data.payScale}</p>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center gap-4">
+                        <Globe className="h-8 w-8 text-primary" />
+                        <div>
+                            <CardTitle className="font-headline text-2xl">National & International Opportunities</CardTitle>
+                            <CardDescription>Where this role is in high demand.</CardDescription>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                       <p className="text-muted-foreground">{data.globalOpportunities}</p>
+                    </CardContent>
+                </Card>
+            </main>
+        </div>
+    </div>
+);
+
 export default function MainPage() {
   const [loading, setLoading] = useState(false);
-  const [loadingStage, setLoadingStage] = useState<'exploring' | 'generating' | null>(null);
+  const [loadingStage, setLoadingStage] = useState<'exploring' | 'generating' | 'fetching_opportunities' | null>(null);
   const [explorationResult, setExplorationResult] = useState<CareerExplorationOutput | null>(null);
+  const [opportunitiesResult, setOpportunitiesResult] = useState<CareerOpportunitiesOutput | null>(null);
   const [finalResult, setFinalResult] = useState<CareerPathOutput | null>(null);
   const [userInput, setUserInput] = useState<UserInput | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const { toast } = useToast();
   const { user, loading: authLoading, signOut } = useAuth();
   const [isQuestionnaireOpen, setIsQuestionnaireOpen] = useState(false);
@@ -157,18 +223,51 @@ export default function MainPage() {
       setLoadingStage(null);
     }
   }
+
+  async function onExploreOpportunities(specificRole: string) {
+      setLoading(true);
+      setLoadingStage('fetching_opportunities');
+      setOpportunitiesResult(null);
+      try {
+          const response = await getCareerOpportunitiesAction({ specificRole });
+          if (response.success) {
+              setOpportunitiesResult(response.data);
+          } else {
+              toast({ variant: 'destructive', title: 'Error', description: response.error });
+          }
+      } catch (error) {
+          toast({ variant: 'destructive', title: 'Error', description: 'An unexpected error occurred. Please try again.' });
+      } finally {
+          setLoading(false);
+          setLoadingStage(null);
+      }
+  }
   
+  const handleSelectRole = (role: string) => {
+    setSelectedRole(role);
+    setExplorationResult(null); // Move to the selection screen
+  }
+
   const handleReset = () => {
     setFinalResult(null);
     setExplorationResult(null);
     setUserInput(null);
     setUserPath(null);
+    setSelectedRole(null);
+    setOpportunitiesResult(null);
     form.reset();
   };
   
   const handleBackToExplore = () => {
       setFinalResult(null);
       setExplorationResult(null);
+      setSelectedRole(null);
+  }
+
+  const handleBackToRoleSelection = () => {
+      setOpportunitiesResult(null);
+      setSelectedRole(selectedRole); // Stay on role selection
+      setExplorationResult(null); // but don't show exploration result
   }
 
   const handleQuestionnaireSubmit = (data: any) => {
@@ -192,18 +291,19 @@ export default function MainPage() {
   }
 
   if (loading) {
+    let message = 'Our AI is charting the course for your new career. Hang tight!';
+    if (loadingStage === 'exploring') message = 'Our AI is analyzing the career field for you.';
+    if (loadingStage === 'fetching_opportunities') message = 'Analyzing job market data...';
+
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
         <h1 className="text-2xl font-headline text-primary-foreground font-semibold">
-          {loadingStage === 'exploring' ? 'Exploring possibilities...' : 'Generating your future...'}
+          {loadingStage === 'exploring' && 'Exploring possibilities...'}
+          {loadingStage === 'generating' && 'Generating your future...'}
+          {loadingStage === 'fetching_opportunities' && 'Gathering Insights...'}
         </h1>
-        <p className="text-muted-foreground mt-2">
-            {loadingStage === 'exploring' 
-                ? 'Our AI is analyzing the career field for you.' 
-                : 'Our AI is charting the course for your new career. Hang tight!'
-            }
-        </p>
+        <p className="text-muted-foreground mt-2">{message}</p>
       </div>
     );
   }
@@ -211,12 +311,20 @@ export default function MainPage() {
   if (finalResult && userInput) {
     return <CareerRoadmap data={finalResult} userInput={userInput} onReset={handleReset} />;
   }
+  
+  if (opportunitiesResult && selectedRole) {
+      return <CareerOpportunitiesResult data={opportunitiesResult} role={selectedRole} onBack={handleBackToRoleSelection} />;
+  }
+
+  if (selectedRole) {
+      return <RoleSelectionScreen role={selectedRole} onGenerateRoadmap={() => onGenerateRoadmap(selectedRole)} onExploreOpportunities={() => onExploreOpportunities(selectedRole)} onBack={handleBackToExplore} />
+  }
 
   if (explorationResult && userInput) {
     return <CareerExplorationResult 
                 data={explorationResult} 
                 userInput={userInput}
-                onSelectRole={onGenerateRoadmap}
+                onSelectRole={handleSelectRole}
                 onReset={handleBackToExplore}
             />;
   }
@@ -258,6 +366,48 @@ export default function MainPage() {
         </Button>
       </PopoverContent>
     </Popover>
+  );
+
+  const RoleSelectionScreen = ({ role, onGenerateRoadmap, onExploreOpportunities, onBack }: { role: string; onGenerateRoadmap: () => void; onExploreOpportunities: () => void; onBack: () => void; }) => (
+    <div className="w-full max-w-4xl mx-auto text-center">
+        <Button variant="ghost" onClick={onBack} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Back to exploration</Button>
+        <div className="text-center mb-10">
+            <h1 className="text-5xl font-headline font-bold text-slate-800">You've selected: {role}</h1>
+            <p className="mt-4 text-lg text-muted-foreground">What would you like to do next?</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+             <Card className="shadow-2xl shadow-slate-200 text-center p-8 hover:shadow-primary/20 transition-shadow">
+                <CardHeader>
+                    <Route className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <CardTitle className="font-headline text-3xl">Custom Roadmap</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground mb-6">
+                        Generate a personalized, step-by-step learning path to master this role.
+                    </p>
+                    <Button size="lg" onClick={onGenerateRoadmap}>
+                        Create My Plan
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                </CardContent>
+            </Card>
+            <Card className="shadow-2xl shadow-slate-200 text-center p-8 hover:shadow-primary/20 transition-shadow">
+                <CardHeader>
+                    <TrendingUp className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <CardTitle className="font-headline text-3xl">Explore Opportunities</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground mb-6">
+                        Get insights into job trends, salary expectations, and market demand for this role.
+                    </p>
+                    <Button size="lg" onClick={onExploreOpportunities}>
+                        Analyze Career
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
+    </div>
   );
 
   const PathSelection = () => (
@@ -420,5 +570,3 @@ export default function MainPage() {
     </>
   );
 }
-
-    
