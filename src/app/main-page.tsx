@@ -5,8 +5,7 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle } from 'lucide-react';
-import Image from 'next/image';
+import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -39,6 +38,7 @@ export default function MainPage() {
   const { toast } = useToast();
   const { user, loading: authLoading, signOut } = useAuth();
   const [isQuestionnaireOpen, setIsQuestionnaireOpen] = useState(false);
+  const [userPath, setUserPath] = useState<'explore' | 'direct' | null>(null);
 
   const form = useForm<UserInput>({
     resolver: zodResolver(FormSchema),
@@ -51,9 +51,15 @@ export default function MainPage() {
 
   async function onSubmit(data: UserInput) {
     setLoading(true);
+    setResult(null);
     setUserInput(data);
     try {
-      const response = await generateCareerPathAction({ career: data.desiredCareer, currentRole: data.currentRole, interests: data.interests });
+      const response = await generateCareerPathAction({ 
+        career: data.desiredCareer, 
+        currentRole: data.currentRole, 
+        interests: data.interests 
+      });
+
       if (response.success) {
         setResult(response.data);
       } else {
@@ -77,17 +83,16 @@ export default function MainPage() {
   const handleReset = () => {
     setResult(null);
     setUserInput(null);
+    setUserPath(null);
     form.reset();
   };
 
   const handleQuestionnaireSubmit = (data: any) => {
-    // This is where you would handle the data from the questionnaire
     console.log('Questionnaire submitted:', data);
-    // For now, let's just use the desiredCareer to generate a roadmap
     const mappedData: UserInput = {
       desiredCareer: data.step2.careerGoal,
       currentRole: data.step2.currentBackground,
-      interests: data.step3.interests,
+      interests: `${data.step3.interests}, ${data.step3.skills}`,
     }
     onSubmit(mappedData);
   }
@@ -155,88 +160,121 @@ export default function MainPage() {
     </Popover>
   );
 
-  return (
-    <>
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50/50">
-      <div className="absolute top-4 right-4">
-        {user && <UserMenu />}
-      </div>
-      <div className="w-full max-w-2xl mx-auto pt-16">
+  const PathSelection = () => (
+    <div className="w-full max-w-4xl mx-auto">
         <div className="text-center mb-10">
-          <div className="flex items-center justify-center mb-4">
-            <Compass className="h-12 w-12 text-primary" />
-          </div>
-          <h1 className="text-5xl font-headline font-bold text-slate-800">Career Compass</h1>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Let our AI career counselor guide you to the perfect career path, tailored just for you.
-          </p>
+            <h1 className="text-5xl font-headline font-bold text-slate-800">Welcome, {user?.displayName || 'Explorer'}!</h1>
+            <p className="mt-4 text-lg text-muted-foreground">
+                How would you like to start your journey today?
+            </p>
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <Card className="shadow-2xl shadow-slate-200 text-center p-8 hover:shadow-primary/20 transition-shadow">
+                <CardHeader>
+                    <Search className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <CardTitle className="font-headline text-3xl">Explore Career Options</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground mb-6">
+                        Not sure where to start? Let's discover your passions and find career paths that match your interests.
+                    </p>
+                    <Button size="lg" onClick={() => setUserPath('explore')}>
+                        Guide Me
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                </CardContent>
+            </Card>
+            <Card className="shadow-2xl shadow-slate-200 text-center p-8 hover:shadow-primary/20 transition-shadow">
+                <CardHeader>
+                    <Route className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <CardTitle className="font-headline text-3xl">I Know My Path</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground mb-6">
+                        Already have a dream job in mind? Get a detailed, step-by-step roadmap to make it a reality.
+                    </p>
+                    <Button size="lg" onClick={() => setUserPath('direct')}>
+                        Show Me The Way
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
+    </div>
+  );
 
+  const DirectInputPath = () => (
+    <div className="w-full max-w-2xl mx-auto">
+        <Button variant="ghost" onClick={() => setUserPath(null)} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Back to choices</Button>
         <Card className="shadow-2xl shadow-slate-200">
-          <CardHeader>
-            <CardTitle className="font-headline text-2xl text-center">Chart Your Course</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="desiredCareer"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Your Desired Career or Skill</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Lightbulb className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                          <Input placeholder="e.g., 'Fashion Designer' or 'Graphic Design'" {...field} className="pl-10" />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
+            <CardHeader>
+                <CardTitle className="font-headline text-2xl text-center">Chart Your Course</CardTitle>
+                <CardDescription className="text-center">Tell us your goal, and we'll build the roadmap.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <FormField
                     control={form.control}
-                    name="currentRole"
+                    name="desiredCareer"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Current Role (Optional)</FormLabel>
+                        <FormItem>
+                        <FormLabel>Your Desired Career or Skill</FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <Input placeholder="e.g., 'Computer Science Student'" {...field} className="pl-10" />
-                          </div>
+                            <div className="relative">
+                            <Lightbulb className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <Input placeholder="e.g., 'Fashion Designer' or 'Graphic Design'" {...field} className="pl-10" />
+                            </div>
                         </FormControl>
-                      </FormItem>
+                        <FormMessage />
+                        </FormItem>
                     )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="interests"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Your Interests (Optional)</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <Input placeholder="e.g., 'Art, technology, reading'" {...field} className="pl-10" />
-                          </div>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <Button type="submit" className="w-full !mt-8" size="lg" disabled={loading}>
-                  Generate My Roadmap
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                        control={form.control}
+                        name="currentRole"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Current Role (Optional)</FormLabel>
+                            <FormControl>
+                            <div className="relative">
+                                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                <Input placeholder="e.g., 'Computer Science Student'" {...field} className="pl-10" />
+                            </div>
+                            </FormControl>
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="interests"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Your Interests (Optional)</FormLabel>
+                            <FormControl>
+                            <div className="relative">
+                                <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                <Input placeholder="e.g., 'Art, technology, reading'" {...field} className="pl-10" />
+                            </div>
+                            </FormControl>
+                        </FormItem>
+                        )}
+                    />
+                    </div>
+                    <Button type="submit" className="w-full !mt-8" size="lg" disabled={loading}>
+                    Generate My Roadmap
+                    </Button>
+                </form>
+                </Form>
+            </CardContent>
         </Card>
-      </div>
-      
-      <div className="w-full max-w-4xl mx-auto mt-24 mb-16">
+    </div>
+  );
+
+  const ExplorationPath = () => (
+     <div className="w-full max-w-4xl mx-auto text-center">
+        <Button variant="ghost" onClick={() => setUserPath(null)} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Back to choices</Button>
         <div className="text-center mb-12">
           <h2 className="text-4xl font-headline font-bold text-slate-800">Your Guided Journey</h2>
           <p className="mt-4 text-lg text-muted-foreground">Answer a few questions to build a hyper-personalized career plan.</p>
@@ -257,6 +295,20 @@ export default function MainPage() {
             </CardContent>
         </Card>
       </div>
+  );
+
+  return (
+    <>
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50/50">
+        <div className="absolute top-4 right-4">
+            {user && <UserMenu />}
+        </div>
+        
+        <div className="w-full flex-1 flex items-center justify-center">
+            {!userPath && <PathSelection />}
+            {userPath === 'direct' && <DirectInputPath />}
+            {userPath === 'explore' && <ExplorationPath />}
+        </div>
     </div>
 
     <InteractiveQuestionnaire 
@@ -267,23 +319,4 @@ export default function MainPage() {
     </>
   );
 }
-
-function ArrowRight(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-        </svg>
-    )
-}
+ 
