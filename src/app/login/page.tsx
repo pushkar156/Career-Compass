@@ -31,6 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 const signInSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -79,24 +80,16 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
 
-  useEffect(() => {
-    try {
-        if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-              'size': 'invisible',
-              'callback': (response: any) => {
-                // reCAPTCHA solved, allow signInWithPhoneNumber.
-              },
-            });
-        }
-    } catch (e) {
-        console.error("Error initializing reCAPTCHA", e);
-    }
-  }, []);
-
-
   const setupRecaptcha = () => {
-    return window.recaptchaVerifier!;
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': (response: any) => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        },
+      });
+    }
+    return window.recaptchaVerifier;
   }
 
   const handleAuthError = (error: any) => {
@@ -396,3 +389,5 @@ declare global {
     recaptchaVerifier?: RecaptchaVerifier;
   }
 }
+
+    
