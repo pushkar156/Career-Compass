@@ -467,7 +467,6 @@ export default function MainPage() {
 
   if (loading) {
     let message = 'Our AI is charting the course for your new career. Hang tight!';
-    if (loadingStage === 'exploring') message = 'Our AI is analyzing the career field for you.';
     if (loadingStage === 'fetching_opportunities') message = 'Analyzing job market data...';
 
     return (
@@ -698,7 +697,7 @@ export default function MainPage() {
             </CardHeader>
             <CardContent>
                 <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Ready to find your calling? We'll walk you through a simple, 5-step process to explore your passions, define your goals, and create a custom-built action plan for your dream career.
+                Ready to find your calling? We'll walk you through a simple, 4-step process to explore your passions, define your goals, and create a custom-built action plan for your dream career.
                 </p>
                 <Button size="lg" onClick={() => setIsQuestionnaireOpen(true)}>
                     Start My Journey
@@ -736,3 +735,4 @@ export default function MainPage() {
     
 
     
+

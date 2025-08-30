@@ -14,7 +14,6 @@ import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Progress } from '@/components/ui/progress';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
-import { Checkbox } from '@/components/ui/checkbox';
 
 import { Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 
@@ -52,21 +51,12 @@ const steps = [
   {
     icon: ListChecks,
     title: 'Action Plan Preparation',
-    description: 'How do you prefer to learn?',
+    description: 'How do you prefer to learn? Click "Generate Roadmap" when you are ready!',
     schema: z.object({
       learningStyle: z.string().min(3, 'e.g., videos, articles, hands-on projects'),
       timeCommitment: z.string().min(2, 'e.g., 5 hours/week'),
     }),
     defaultValues: { learningStyle: '', timeCommitment: '' },
-  },
-  {
-    icon: CheckCircle,
-    title: 'Implementation & Success',
-    description: "Let's confirm and get started!",
-    schema: z.object({
-        confirmation: z.boolean().refine(val => val === true, { message: 'Please confirm to proceed.' })
-    }),
-    defaultValues: { confirmation: false },
   },
 ];
 
@@ -75,7 +65,6 @@ type FormValues = {
   step2: z.infer<typeof steps[1]['schema']>;
   step3: z.infer<typeof steps[2]['schema']>;
   step4: z.infer<typeof steps[3]['schema']>;
-  step5: z.infer<typeof steps[4]['schema']>;
 };
 
 
@@ -251,26 +240,6 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
                 />
             </>
         );
-      case 4:
-          return (
-            <FormField
-                control={methods.control}
-                name="confirmation"
-                render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
-                        <FormControl>
-                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                            <Label htmlFor="confirmation">
-                               I'm ready to generate my personalized career roadmap!
-                            </Label>
-                        </div>
-                         <FormMessage />
-                    </FormItem>
-                )}
-            />
-          );
       default:
         return null;
     }
@@ -304,7 +273,7 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
                 </AnimatePresence>
             </div>
 
-            <div className="p-6 border-t mt-auto bg-slate-50">
+            <div className="p-6 border-t mt-auto bg-slate-50 dark:bg-slate-800/50">
                 <div className="flex items-center justify-between">
                     <div>
                          {currentStep > 0 && (
