@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm, FormProvider, Controller } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,7 +14,6 @@ import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Progress } from '@/components/ui/progress';
 import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 
 
@@ -98,7 +97,6 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
   const currentSchema = steps[currentStep].schema;
   const methods = useForm({
     resolver: zodResolver(currentSchema),
-    // Use the default values for the current step, pre-filled with any existing form data
     defaultValues: {
         ...steps[currentStep].defaultValues,
         ...(formData as any)[`step${currentStep + 1}`],
@@ -107,7 +105,6 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
   
   const watchLearningStyles = methods.watch('learningStyles');
 
-  // Reset form with new default values when the step changes
   useEffect(() => {
     methods.reset({
       ...steps[currentStep].defaultValues,
@@ -116,55 +113,34 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
   }, [currentStep, methods, formData]);
 
 
-  const handleNext = async () => {
+  const processAndGoNext = async () => {
     const isValid = await methods.trigger();
     if (isValid) {
       const stepData = { [`step${currentStep + 1}`]: methods.getValues() };
-      setFormData(prev => ({ ...prev, ...stepData }));
+      const newFormData = { ...formData, ...stepData };
+      setFormData(newFormData);
+
       if (currentStep < steps.length - 1) {
         setCurrentStep(currentStep + 1);
+      } else {
+        // This is the final step, call submit
+        onSubmit(newFormData as FormValues);
+        onOpenChange(false);
+        // Reset state for next time
+        setTimeout(() => {
+            setCurrentStep(0);
+            setFormData({});
+            methods.reset(steps[0].defaultValues);
+        }, 500);
       }
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
-      // Save current step's data before going back
-      const stepData = { [`step${currentStep + 1}`]: methods.getValues() };
-      setFormData(prev => ({ ...prev, ...stepData }));
       setCurrentStep(currentStep - 1);
     }
   };
-  
-  const handleFormSubmit = async () => {
-     const isValid = await methods.trigger();
-     if (!isValid) return;
-
-     const values = methods.getValues();
-     const learningStyles = values.learningStyles || [];
-     const otherStyle = values.otherLearningStyle;
-     const finalLearningPreference = learningStyles.filter(s => s !== 'other');
-     if (learningStyles.includes('other') && otherStyle) {
-       finalLearningPreference.push(otherStyle);
-     }
-
-     const finalData = { 
-        ...formData, 
-        [`step${currentStep + 1}`]: {
-          ...values,
-          learningStyle: finalLearningPreference.join(', '), // Create a combined string for the final output
-        }
-    } as FormValues;
-     
-    onSubmit(finalData);
-    onOpenChange(false);
-     // Reset state for next time
-    setTimeout(() => {
-        setCurrentStep(0);
-        setFormData({});
-        methods.reset(steps[0].defaultValues);
-    }, 500);
-  }
 
   const progress = ((currentStep + 1) / steps.length) * 100;
   const Icon = steps[currentStep].icon;
@@ -383,12 +359,12 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
                     <div className="flex items-center gap-4">
                          <Progress value={progress} className="w-32" />
                          {currentStep < steps.length - 1 ? (
-                            <Button type="button" onClick={handleNext}>
+                            <Button type="button" onClick={processAndGoNext}>
                                 Next
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                         ) : (
-                            <Button type="button" onClick={handleFormSubmit}>
+                            <Button type="button" onClick={processAndGoNext}>
                                 Generate Roadmap
                                 <CheckCircle className="ml-2 h-4 w-4" />
                             </Button>

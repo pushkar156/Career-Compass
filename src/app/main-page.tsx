@@ -445,11 +445,14 @@ export default function MainPage() {
   }
 
   const handleQuestionnaireSubmit = (data: any) => {
-    console.log('Questionnaire submitted:', data);
+    const learningStyles = data.step4.learningStyles?.includes('other') 
+      ? [...data.step4.learningStyles.filter((s: string) => s !== 'other'), data.step4.otherLearningStyle]
+      : data.step4.learningStyles;
+
     const mappedData: UserInput = {
       desiredCareer: data.step2.careerGoal,
       currentRole: data.step2.currentBackground,
-      interests: `${data.step3.interests}, ${data.step3.skills}`,
+      interests: `${data.step3.interests}, ${data.step3.skills}, Prefers learning styles: ${learningStyles.join(', ')}`,
     }
     form.reset(mappedData);
     onExploreSubmit(mappedData);
@@ -731,8 +734,3 @@ export default function MainPage() {
     </>
   );
 }
-
-    
-
-    
-
