@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,11 +13,21 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Progress } from '@/components/ui/progress';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
 
 import { Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+
+
+const learningStyleOptions = [
+    { id: 'visual', label: 'Visual (Videos, Diagrams)' },
+    { id: 'auditory', label: 'Auditory (Podcasts, Lectures)' },
+    { id: 'reading', label: 'Reading/Writing (Articles, Books)' },
+    { id: 'kinesthetic', label: 'Kinesthetic (Hands-on Projects)' },
+    { id: 'other', label: 'Other' },
+] as const;
 
 
 const steps = [
@@ -55,10 +65,21 @@ const steps = [
     title: 'Action Plan Preparation',
     description: 'How do you prefer to learn? Click "Generate Roadmap" when you are ready!',
     schema: z.object({
-      learningStyle: z.string({ required_error: 'Please select a learning style.'}),
-      timeCommitment: z.string().min(2, 'e.g., 5 hours/week'),
+        learningStyles: z.array(z.string()).refine((value) => value.some((item) => item), {
+            message: "You have to select at least one learning style.",
+        }),
+        otherLearningStyle: z.string().optional(),
+        timeCommitment: z.string().min(2, 'e.g., 5 hours/week'),
+    }).refine((data) => {
+        if (data.learningStyles.includes('other')) {
+            return !!data.otherLearningStyle && data.otherLearningStyle.length > 2;
+        }
+        return true;
+    }, {
+        message: "Please specify your learning style.",
+        path: ["otherLearningStyle"],
     }),
-    defaultValues: { learningStyle: '', timeCommitment: '' },
+    defaultValues: { learningStyles: [], otherLearningStyle: '', timeCommitment: '' },
   },
 ];
 
@@ -83,6 +104,8 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
         ...(formData as any)[`step${currentStep + 1}`],
     },
   });
+  
+  const watchLearningStyles = methods.watch('learningStyles');
 
   // Reset form with new default values when the step changes
   useEffect(() => {
@@ -117,15 +140,30 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
      const isValid = await methods.trigger();
      if (!isValid) return;
 
-     const finalData = { ...formData, [`step${currentStep + 1}`]: methods.getValues() } as FormValues;
-     onSubmit(finalData);
-     onOpenChange(false);
+     const values = methods.getValues();
+     const learningStyles = values.learningStyles || [];
+     const otherStyle = values.otherLearningStyle;
+     const finalLearningPreference = learningStyles.filter(s => s !== 'other');
+     if (learningStyles.includes('other') && otherStyle) {
+       finalLearningPreference.push(otherStyle);
+     }
+
+     const finalData = { 
+        ...formData, 
+        [`step${currentStep + 1}`]: {
+          ...values,
+          learningStyle: finalLearningPreference.join(', '), // Create a combined string for the final output
+        }
+    } as FormValues;
+     
+    onSubmit(finalData);
+    onOpenChange(false);
      // Reset state for next time
-     setTimeout(() => {
+    setTimeout(() => {
         setCurrentStep(0);
         setFormData({});
         methods.reset(steps[0].defaultValues);
-     }, 500);
+    }, 500);
   }
 
   const progress = ((currentStep + 1) / steps.length) * 100;
@@ -215,28 +253,74 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
         return (
           <>
             <FormField
-              control={methods.control}
-              name="learningStyle"
-              render={({ field }) => (
-                <FormItem>
-                  <Label>How do you learn best?</Label>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a learning style" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Visual (Videos)">Visual (Videos)</SelectItem>
-                      <SelectItem value="Auditory (Podcasts)">Auditory (Podcasts)</SelectItem>
-                      <SelectItem value="Reading/Writing (Articles)">Reading/Writing (Articles)</SelectItem>
-                      <SelectItem value="Kinesthetic (Projects)">Kinesthetic (Projects)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                control={methods.control}
+                name="learningStyles"
+                render={() => (
+                    <FormItem>
+                    <div className="mb-4">
+                        <FormLabel className="text-base">How do you learn best?</FormLabel>
+                    </div>
+                    {learningStyleOptions.map((item) => (
+                        <FormField
+                        key={item.id}
+                        control={methods.control}
+                        name="learningStyles"
+                        render={({ field }) => {
+                            return (
+                            <FormItem
+                                key={item.id}
+                                className="flex flex-row items-start space-x-3 space-y-0"
+                            >
+                                <FormControl>
+                                <Checkbox
+                                    checked={field.value?.includes(item.id)}
+                                    onCheckedChange={(checked) => {
+                                    return checked
+                                        ? field.onChange([...(field.value || []), item.id])
+                                        : field.onChange(
+                                            (field.value || []).filter(
+                                                (value) => value !== item.id
+                                            )
+                                            );
+                                    }}
+                                />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                {item.label}
+                                </FormLabel>
+                            </FormItem>
+                            );
+                        }}
+                        />
+                    ))}
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <AnimatePresence>
+                    {watchLearningStyles?.includes('other') && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <FormField
+                                control={methods.control}
+                                name="otherLearningStyle"
+                                render={({ field }) => (
+                                    <FormItem className="pl-6 pt-2">
+                                        <FormControl>
+                                            <Input placeholder="Please specify your learning style" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            
             <FormField
                 control={methods.control}
                 name="timeCommitment"
