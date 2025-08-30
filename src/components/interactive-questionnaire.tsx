@@ -14,6 +14,8 @@ import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Progress } from '@/components/ui/progress';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 
 import { Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 
@@ -53,7 +55,7 @@ const steps = [
     title: 'Action Plan Preparation',
     description: 'How do you prefer to learn? Click "Generate Roadmap" when you are ready!',
     schema: z.object({
-      learningStyle: z.string().min(3, 'e.g., videos, articles, hands-on projects'),
+      learningStyle: z.string({ required_error: 'Please select a learning style.'}),
       timeCommitment: z.string().min(2, 'e.g., 5 hours/week'),
     }),
     defaultValues: { learningStyle: '', timeCommitment: '' },
@@ -211,34 +213,44 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
         );
       case 3:
         return (
-            <>
-                <FormField
-                    control={methods.control}
-                    name="learningStyle"
-                    render={({ field }) => (
-                        <FormItem>
-                            <Label>How do you learn best?</Label>
-                            <FormControl>
-                                <Input placeholder="e.g., Reading books, watching tutorials, project-based" {...field} />
-                            </FormControl>
-                             <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={methods.control}
-                    name="timeCommitment"
-                    render={({ field }) => (
-                        <FormItem>
-                            <Label>How much time can you commit per week?</Label>
-                            <FormControl>
-                                <Input placeholder="e.g., 3-5 hours" {...field} />
-                            </FormControl>
-                             <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            </>
+          <>
+            <FormField
+              control={methods.control}
+              name="learningStyle"
+              render={({ field }) => (
+                <FormItem>
+                  <Label>How do you learn best?</Label>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a learning style" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Visual (Videos)">Visual (Videos)</SelectItem>
+                      <SelectItem value="Auditory (Podcasts)">Auditory (Podcasts)</SelectItem>
+                      <SelectItem value="Reading/Writing (Articles)">Reading/Writing (Articles)</SelectItem>
+                      <SelectItem value="Kinesthetic (Projects)">Kinesthetic (Projects)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+                control={methods.control}
+                name="timeCommitment"
+                render={({ field }) => (
+                    <FormItem>
+                        <Label>How much time can you commit per week?</Label>
+                        <FormControl>
+                            <Input placeholder="e.g., 3-5 hours" {...field} />
+                        </FormControl>
+                         <FormMessage />
+                    </FormItem>
+                )}
+            />
+        </>
         );
       default:
         return null;
