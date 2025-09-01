@@ -80,7 +80,7 @@ Your response must be structured and detailed, following these strict guidelines
     *   **For websites and articles:** Prioritize authoritative sources like MDN Web Docs, GeeksforGeeks, W3Schools, official documentation, and top-tier blogs. When providing the title, include the domain name in parentheses, e.g., 'Official React Docs (react.dev)'.
     *   **For online courses:** Include highly-rated courses from major platforms like Coursera and Udemy. Ensure the links are direct and valid.
     *   **For YouTube videos:** For each major learning topic identified in the knowledge areas, you **MUST** use the \`findYoutubeVideosTool\` to find relevant videos.
-        *   For each call to the tool, generate search queries that will find the most helpful, highly-regarded, and popular videos in both **English** and **Hindi**.
+        *   For each call to the tool, generate search queries that will find the most helpful, highly-regarded, and popular videos.
         *   The tool will return valid, publicly-accessible videos with their IDs. You must include these in your response. Do not hallucinate or guess video details.
 
 4.  **Tools (tools):**
