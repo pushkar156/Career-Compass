@@ -26,6 +26,8 @@ import {
   GraduationCap,
   ListTree,
   DollarSign,
+  Lightbulb,
+  CheckCircle,
 } from 'lucide-react';
 
 interface CareerRoadmapProps {
@@ -168,6 +170,31 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                 <p className="text-center text-sm mt-2 font-bold text-primary">{Math.round(progress)}% Complete</p>
               </CardContent>
             </Card>
+
+             {data.advice && data.advice.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-headline flex items-center gap-2">
+                    <Lightbulb />
+                    Personalized Advice
+                  </CardTitle>
+                  <CardDescription>
+                    Actionable tips for your journey from your current role.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {data.advice.map((tip, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 mt-1 shrink-0" />
+                        <span className="text-muted-foreground text-sm">{tip}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
           </aside>
 
           {/* Right Column */}

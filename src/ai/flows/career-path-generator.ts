@@ -45,6 +45,7 @@ const CareerPathOutputSchema = z.object({
   knowledgeAreas: RoadmapSchema.describe('List of required knowledge areas, segmented by skill level.'),
   resources: z.array(ResourceSchema).describe('List of relevant, high-quality resources.'),
   tools: z.array(ToolSchema).describe('List of the essential tools for the field, ordered from most to least recommended.'),
+  advice: z.array(z.string()).describe('A list of personalized advice points for transitioning from the current role to the desired career, especially for students.'),
 });
 export type CareerPathOutput = z.infer<typeof CareerPathOutputSchema>;
 
@@ -90,6 +91,12 @@ Your response must be structured and detailed, following these strict guidelines
     *   **Prioritize free and open-source tools where possible.** If a paid tool is the undisputed industry standard, include it, but ensure free alternatives are also listed if they exist.
     *   **Order the list from the most recommended tool to the least recommended.**
     *   For each tool, you must provide its name, a brief one-sentence description, and its cost model ('Free', 'Paid', or 'Freemium').
+
+5.  **Personalized Advice (advice):**
+    *   Based on the user's current role (especially if they are a student), provide a list of specific, actionable advice points as bullet points.
+    *   Focus on how they can leverage their current position to get ahead.
+    *   For students, this should include tips on internships, networking with professors and alumni, building a portfolio with class projects, and joining relevant clubs.
+    *   If no current role is provided, give general advice for a career changer.
 
 Return the entire response in a single, valid JSON object that adheres to the defined output schema. Every single URL must be a valid, working, direct link to the resource.`,
 });
