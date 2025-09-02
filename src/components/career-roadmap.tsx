@@ -114,7 +114,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
         <header className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-headline font-bold">Your Custom Roadmap</h1>
-            <p className="text-muted-foreground">AI-generated guide for becoming a {userInput.desiredCareer}</p>
+            <p className="text-muted-foreground">A custom guide for becoming a {userInput.desiredCareer}</p>
           </div>
           <Button variant="outline" onClick={onReset}>
             <ArrowLeft className="mr-2 h-4 w-4" />

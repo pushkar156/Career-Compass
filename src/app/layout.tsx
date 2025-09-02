@@ -8,7 +8,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
   title: 'Career Compass',
-  description: 'Your AI-powered career counselor for a personalized learning roadmap.',
+  description: 'Your personalized career counselor for a custom learning roadmap.',
 };
 
 export default function RootLayout({

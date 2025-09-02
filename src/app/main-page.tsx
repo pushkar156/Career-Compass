@@ -132,7 +132,7 @@ export default function MainPage() {
                 <header className="mb-8">
                     <Button variant="ghost" onClick={onBack} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4" />Back to Role Selection</Button>
                     <h1 className="text-4xl font-headline font-bold">Career Opportunities: {role}</h1>
-                    <p className="text-muted-foreground mt-2">An AI-powered analysis of the job market and future trends for this role.</p>
+                    <p className="text-muted-foreground mt-2">An analysis of the job market and future trends for this role.</p>
                 </header>
 
                 <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -469,7 +469,7 @@ export default function MainPage() {
   }
 
   if (loading) {
-    let message = 'Our AI is charting the course for your new career. Hang tight!';
+    let message = 'Charting the course for your new career. Hang tight!';
     if (loadingStage === 'fetching_opportunities') message = 'Analyzing job market data...';
 
     return (
