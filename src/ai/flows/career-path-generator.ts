@@ -60,15 +60,17 @@ const careerPathPrompt = ai.definePrompt({
   prompt: `You are an expert AI career counselor and content curator. Your goal is to provide a comprehensive, high-quality, and actionable guide for a user aspiring to enter the field of: {{{career}}}.
 
 Consider the user's background:
-{{#if currentRole}}Current Role: {{{currentRole}}}{{/if}}
-{{#if interests}}Interests: {{{interests}}}{{/if}}
+{{#if currentRole}}**Current Role:** {{{currentRole}}}{{/if}}
+{{#if interests}}**Interests:** {{{interests}}}{{/if}}
+
+**Crucially, if the user's current role indicates they are a student (e.g., "B.Tech second year student", "Computer Science Student"), you MUST tailor the roadmap and advice accordingly. The steps should be things they can do *alongside* their current studies, such as online courses, personal projects, internships, and contributing to open-source.**
 
 Your response must be structured and detailed, following these strict guidelines:
 
 1.  **Roadmap (roadmap):**
     *   Create a step-by-step learning roadmap.
     *   Organize the roadmap into three distinct sections: 'beginnerToIntermediate', 'intermediateToPro', and 'proToAdvanced'.
-    *   Each step should be a clear, concise action item.
+    *   Each step should be a clear, concise action item. If the user is a student, frame these as actions they can take during their studies.
 
 2.  **Knowledge Areas (knowledgeAreas):**
     *   Identify the key knowledge areas required for this career.
