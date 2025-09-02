@@ -81,12 +81,13 @@ Your response must be structured and detailed, following these strict guidelines
     *   Provide a curated list of the **best available and most popular resources**. Quality and popularity are more important than quantity.
     *   **For websites and articles:** Prioritize authoritative sources like MDN Web Docs, GeeksforGeeks, W3Schools, official documentation, and top-tier blogs. When providing the title, include the domain name in parentheses, e.g., 'Official React Docs (react.dev)'.
     *   **For online courses:** Include highly-rated courses from major platforms like Coursera and Udemy. Ensure the links are direct and valid.
-    *   **For YouTube videos:** For each major learning topic identified in the knowledge areas, you **MUST** use the \`findYoutubeVideosTool\` to find relevant videos.
+    *   **For YouTube videos:** For each major learning topic identified in the knowledge areas, you **MUST** use the \`findYoutubeVideosTool\` to find the most relevant, popular, and embeddable videos.
         *   For each call to the tool, generate search queries that will find the most helpful, highly-regarded, and popular videos.
         *   The tool will return valid, publicly-accessible videos with their IDs. You must include these in your response. Do not hallucinate or guess video details.
 
 4.  **Tools (tools):**
     *   List the most essential, industry-standard software and tools for this career.
+    *   **Prioritize free and open-source tools where possible.** If a paid tool is the undisputed industry standard, include it, but ensure free alternatives are also listed if they exist.
     *   **Order the list from the most recommended tool to the least recommended.**
     *   For each tool, you must provide its name, a brief one-sentence description, and its cost model ('Free', 'Paid', or 'Freemium').
 
