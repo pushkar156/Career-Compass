@@ -4,57 +4,58 @@
 
 @layer base {
   :root {
-    --background: 80 20% 96%;
-    --foreground: 120 25% 15%;
-    --card: 80 20% 96%;
-    --card-foreground: 120 25% 15%;
-    --popover: 80 20% 96%;
-    --popover-foreground: 120 25% 15%;
-    --primary: 95 35% 45%;
-    --primary-foreground: 80 20% 96%;
-    --secondary: 90 20% 90%;
-    --secondary-foreground: 120 25% 15%;
-    --muted: 90 20% 90%;
-    --muted-foreground: 120 10% 45%;
-    --accent: 95 25% 65%;
-    --accent-foreground: 120 25% 15%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 90 20% 85%;
-    --input: 90 20% 88%;
-    --ring: 95 35% 45%;
-    --radius: 0.8rem;
-    --chart-1: 95 35% 45%;
-    --chart-2: 95 25% 65%;
-    --chart-3: 100 20% 55%;
-    --chart-4: 90 30% 75%;
-    --chart-5: 85 20% 85%;
-  }
-  .dark {
-    --background: 120 10% 8%;
-    --foreground: 90 20% 95%;
-    --card: 120 10% 10%;
-    --card-foreground: 90 20% 95%;
-    --popover: 120 10% 8%;
-    --popover-foreground: 90 20% 95%;
-    --primary: 95 35% 45%;
-    --primary-foreground: 80 20% 96%;
-    --secondary: 120 10% 15%;
-    --secondary-foreground: 90 20% 95%;
-    --muted: 120 10% 15%;
-    --muted-foreground: 90 20% 65%;
-    --accent: 95 25% 65%;
-    --accent-foreground: 120 25% 15%;
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 220.9 39.3% 11%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 90 20% 95%;
-    --border: 120 10% 20%;
-    --input: 120 10% 18%;
-    --ring: 95 35% 45%;
-    --chart-1: 95 35% 45%;
-    --chart-2: 95 25% 65%;
-    --chart-3: 100 20% 55%;
-    --chart-4: 90 30% 75%;
-    --chart-5: 85 20% 85%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 216 34.9% 33.7%;
+    --radius: 0.8rem;
+    --chart-1: 210 20% 98%;
+    --chart-2: 180 50% 70%;
+    --chart-3: 300 50% 80%;
+    --chart-4: 45 60% 75%;
+    --chart-5: 240 40% 65%;
+  }
+
+  .dark {
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 220.9 39.3% 11%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 216 34.9% 33.7%;
+    --chart-1: 210 20% 98%;
+    --chart-2: 180 50% 70%;
+    --chart-3: 300 50% 80%;
+    --chart-4: 45 60% 75%;
+    --chart-5: 240 40% 65%;
   }
 }
 
@@ -65,4 +66,45 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+body {
+    background-color: hsl(var(--background));
+    background-image: 
+        radial-gradient(ellipse 50% 80% at 20% 40%, hsla(215, 27.9%, 16.9%, 0.3), transparent),
+        radial-gradient(ellipse 50% 80% at 80% 50%, hsla(300, 50%, 80%, 0.15), transparent);
+    background-size: 100% 100%;
+    background-attachment: fixed;
+    animation: bg-pan 12s linear infinite;
+}
+
+#particle-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    opacity: 0;
+    animation: float 20s infinite ease-in-out;
+}
+
+@keyframes float {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    10% { opacity: 0.1; }
+    90% { opacity: 0.05; }
+    100% { transform: translateY(-100vh) translateX(var(--x-end)); opacity: 0; }
+}
+
+@keyframes bg-pan {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }

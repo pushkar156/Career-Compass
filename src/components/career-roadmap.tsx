@@ -29,6 +29,7 @@ import {
   Lightbulb,
   CheckCircle,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface CareerRoadmapProps {
   data: CareerPathOutput;
@@ -79,7 +80,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
   };
 
   const renderKnowledgeAreaCheckbox = (area: string, index: number) => (
-    <div key={index} className="flex items-center space-x-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-md">
+    <div key={index} className="flex items-center space-x-3 bg-secondary/50 p-3 rounded-md">
       <Checkbox
         id={`task-${area}-${index}`}
         checked={completedTasks.includes(area)}
@@ -109,9 +110,14 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
 
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-6 md:p-10">
+    <div className="min-h-screen p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-8 flex items-center justify-between">
+        <motion.header 
+          className="mb-8 flex items-center justify-between"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <div>
             <h1 className="text-4xl font-headline font-bold">Your Custom Roadmap</h1>
             <p className="text-muted-foreground">A custom guide for becoming a {userInput.desiredCareer}</p>
@@ -120,85 +126,106 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
             <ArrowLeft className="mr-2 h-4 w-4" />
             Start Over
           </Button>
-        </header>
+        </motion.header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
           <aside className="lg:col-span-1 space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2"><User />Your Profile</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-sm">
-                <div className="flex items-center">
-                  <Goal className="h-5 w-5 mr-3 text-primary" />
-                  <div>
-                    <p className="font-semibold text-muted-foreground">Desired Career</p>
-                    <p className="font-bold">{userInput.desiredCareer}</p>
-                  </div>
-                </div>
-                {userInput.currentRole && (
-                  <div className="flex items-center">
-                    <Briefcase className="h-5 w-5 mr-3 text-primary" />
-                    <div>
-                      <p className="font-semibold text-muted-foreground">Current Role</p>
-                      <p>{userInput.currentRole}</p>
-                    </div>
-                  </div>
-                )}
-                {userInput.interests && (
-                  <div className="flex items-center">
-                    <Sparkles className="h-5 w-5 mr-3 text-primary" />
-                    <div>
-                      <p className="font-semibold text-muted-foreground">Interests</p>
-                      <p>{userInput.interests}</p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline">Progress Tracker</CardTitle>
-                <CardDescription>
-                  {completedTasks.length} of {allKnowledgeAreas.length} knowledge areas acquired
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Progress value={progress} className="w-full" />
-                <p className="text-center text-sm mt-2 font-bold text-primary">{Math.round(progress)}% Complete</p>
-              </CardContent>
-            </Card>
-
-             {data.advice && data.advice.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-headline flex items-center gap-2">
-                    <Lightbulb />
-                    Personalized Advice
-                  </CardTitle>
+                  <CardTitle className="font-headline flex items-center gap-2"><User />Your Profile</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm">
+                  <div className="flex items-center">
+                    <Goal className="h-5 w-5 mr-3 text-primary" />
+                    <div>
+                      <p className="font-semibold text-muted-foreground">Desired Career</p>
+                      <p className="font-bold">{userInput.desiredCareer}</p>
+                    </div>
+                  </div>
+                  {userInput.currentRole && (
+                    <div className="flex items-center">
+                      <Briefcase className="h-5 w-5 mr-3 text-primary" />
+                      <div>
+                        <p className="font-semibold text-muted-foreground">Current Role</p>
+                        <p>{userInput.currentRole}</p>
+                      </div>
+                    </div>
+                  )}
+                  {userInput.interests && (
+                    <div className="flex items-center">
+                      <Sparkles className="h-5 w-5 mr-3 text-primary" />
+                      <div>
+                        <p className="font-semibold text-muted-foreground">Interests</p>
+                        <p>{userInput.interests}</p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-headline">Progress Tracker</CardTitle>
                   <CardDescription>
-                    Actionable tips for your journey from your current role.
+                    {completedTasks.length} of {allKnowledgeAreas.length} knowledge areas acquired
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-3">
-                    {data.advice.map((tip, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-500 mt-1 shrink-0" />
-                        <span className="text-muted-foreground text-sm">{tip}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <Progress value={progress} className="w-full" />
+                  <p className="text-center text-sm mt-2 font-bold text-primary">{Math.round(progress)}% Complete</p>
                 </CardContent>
               </Card>
+            </motion.div>
+
+             {data.advice && data.advice.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                      <Lightbulb />
+                      Personalized Advice
+                    </CardTitle>
+                    <CardDescription>
+                      Actionable tips for your journey.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      {data.advice.map((tip, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <CheckCircle className="h-5 w-5 text-green-500 mt-1 shrink-0" />
+                          <span className="text-muted-foreground text-sm">{tip}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </motion.div>
             )}
 
           </aside>
 
-          {/* Right Column */}
           <main className="lg:col-span-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
             <Tabs defaultValue="learning-path" className="w-full">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="learning-path"><Goal className="mr-2 h-4 w-4" />Learning Path</TabsTrigger>
@@ -290,7 +317,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                   <CardContent>
                     <Accordion type="single" collapsible className="w-full space-y-2">
                       {(data.resources || []).map((resource, index) => (
-                        <AccordionItem value={`item-${index}`} key={index} className="bg-slate-100 dark:bg-slate-800/50 rounded-md px-4 border">
+                        <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/30 rounded-md px-4 border">
                           <AccordionTrigger className="py-3 hover:no-underline">
                             <div className="flex items-center text-left">
                               {getIconForResource(resource.type)}
@@ -342,7 +369,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                   <CardContent>
                      <ul className="space-y-3">
                       {(data.tools || []).map((tool, index) => (
-                        <li key={index} className="p-4 bg-slate-100 dark:bg-slate-800/50 rounded-md border">
+                        <li key={index} className="p-4 bg-secondary/30 rounded-md border">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center">
                                 <Wrench className="h-5 w-5 text-primary mr-3" />
@@ -359,6 +386,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
               </TabsContent>
 
             </Tabs>
+            </motion.div>
           </main>
         </div>
       </div>
