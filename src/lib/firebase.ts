@@ -1,5 +1,6 @@
 
 import { initializeApp, getApps, getApp } from 'firebase/app';
+import { GoogleAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,3 +14,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
+// Create and export a single, stable instance of the GoogleAuthProvider
+export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
