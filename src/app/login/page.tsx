@@ -20,10 +20,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Compass, Mail, KeyRound, LogIn, User } from 'lucide-react';
+import { Compass, Mail, KeyRound, LogIn, User, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
-const auth = getAuth(app);
 
 const signInSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -55,6 +54,7 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [isSigningUp, setIsSigningUp] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -94,14 +94,15 @@ export default function LoginPage() {
   }
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
+    setGoogleLoading(true);
     try {
+      const auth = getAuth(app);
       await signInWithPopup(auth, googleProvider);
       router.push('/');
     } catch (error: any) {
       handleAuthError(error);
     } finally {
-      setLoading(false);
+      setGoogleLoading(false);
     }
   };
 
@@ -118,6 +119,7 @@ export default function LoginPage() {
   const handleEmailSignIn = async (data: SignInForm) => {
     setLoading(true);
     try {
+      const auth = getAuth(app);
       await signInWithEmailAndPassword(auth, data.email, data.password);
       router.push('/');
     } catch (error: any) {
@@ -130,6 +132,7 @@ export default function LoginPage() {
   const handleEmailSignUp = async (data: SignUpForm) => {
     setLoading(true);
     try {
+      const auth = getAuth(app);
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       await updateProfile(userCredential.user, { displayName: data.name });
       router.push('/');
@@ -160,7 +163,8 @@ export default function LoginPage() {
         </div>
         <div className="flex flex-col gap-2 pt-2">
             <Button type="submit" className="w-full" disabled={loading}>
-                <LogIn className="mr-2" /> Sign In
+                {loading ? <Loader2 className="mr-2 animate-spin" /> : <LogIn className="mr-2" />}
+                Sign In
             </Button>
              <p className="text-center text-sm text-muted-foreground">
                 Don't have an account?{' '}
@@ -206,7 +210,7 @@ export default function LoginPage() {
         </div>
         <div className="flex flex-col gap-2 pt-2">
             <Button type="submit" className="w-full" disabled={loading}>
-                Create Account
+                 {loading ? <Loader2 className="mr-2 animate-spin" /> : 'Create Account'}
             </Button>
              <p className="text-center text-sm text-muted-foreground">
                 Already have an account?{' '}
@@ -243,8 +247,8 @@ export default function LoginPage() {
               </div>
             </div>
             
-            <Button onClick={handleGoogleSignIn} className="w-full" variant="outline" disabled={loading}>
-              <GoogleIcon className="mr-2" />
+            <Button onClick={handleGoogleSignIn} className="w-full" variant="outline" disabled={googleLoading}>
+              {googleLoading ? <Loader2 className="mr-2 animate-spin" /> : <GoogleIcon className="mr-2" />}
               Sign In with Google
             </Button>
           </CardContent>
