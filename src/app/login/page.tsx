@@ -205,7 +205,7 @@ export default function LoginPage() {
                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input id="confirmPassword-signup" type="password" placeholder="••••••••" {...signUpForm.register('confirmPassword')} className="pl-10" />
             </div>
-            {signUpForm.formState.errors.confirmPassword && <p className="text-xs text-destructive">{signUpForm.formState.errors.confirmPassword.message}</p>}
+            {signUpForm.formState.errors.confirmPassword && <p className="text-xs text-destructive">{signUpForm.state.errors.confirmPassword.message}</p>}
         </div>
         <div className="flex flex-col gap-2 pt-2">
             <Button type="submit" className="w-full" disabled={loading}>
@@ -224,7 +224,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md mx-auto">
         <div className="text-center mb-8">
           <Compass className="h-12 w-12 text-primary mx-auto mb-4" />
-          <h1 className="text-5xl font-headline font-bold text-slate-800 dark:text-slate-200">Career Compass</h1>
+          <h1 className="text-5xl font-headline font-bold text-foreground">Career Compass</h1>
           <p className="mt-3 text-lg text-muted-foreground">Sign in to continue your journey</p>
         </div>
         <Card className="shadow-lg shadow-slate-200/20 dark:shadow-black/20">
