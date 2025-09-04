@@ -2,9 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import {
   getAuth,
@@ -12,9 +9,10 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
+  GoogleAuthProvider,
 } from 'firebase/auth';
 import type { FirebaseError } from 'firebase/app';
-import { app, googleProvider } from '@/lib/firebase';
+import { app } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,24 +20,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Compass, Mail, KeyRound, LogIn, User, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-
-
-const signInSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
-});
-type SignInForm = z.infer<typeof signInSchema>;
-
-const signUpSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
-  confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-});
-type SignUpForm = z.infer<typeof signUpSchema>;
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -53,9 +33,18 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export default function LoginPage() {
+  const [isSigningUp, setIsSigningUp] = useState(false);
+  
+  // State for forms
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // Loading states
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [isSigningUp, setIsSigningUp] = useState(false);
+
   const { toast } = useToast();
   const router = useRouter();
 
@@ -80,7 +69,7 @@ export default function LoginPage() {
           description = 'The password is too weak. Please choose a stronger one.';
           break;
         case 'auth/popup-closed-by-user':
-          description = 'Sign-in popup closed before completion. Please try again.';
+          description = 'Sign-in popup was closed before completion. Please try again.';
           break;
         default:
           description = firebaseError.message;
@@ -95,9 +84,11 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     try {
-      const auth = getAuth(app);
-      await signInWithPopup(auth, googleProvider);
+      await signInWithPopup(auth, provider);
       router.push('/');
     } catch (error: any) {
       handleAuthError(error);
@@ -106,21 +97,16 @@ export default function LoginPage() {
     }
   };
 
-  const signInForm = useForm<SignInForm>({
-    resolver: zodResolver(signInSchema),
-    defaultValues: { email: '', password: '' },
-  });
-
-  const signUpForm = useForm<SignUpForm>({
-    resolver: zodResolver(signUpSchema),
-    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
-  });
-
-  const handleEmailSignIn = async (data: SignInForm) => {
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Email and password are required.' });
+      return;
+    }
     setLoading(true);
+    const auth = getAuth(app);
     try {
-      const auth = getAuth(app);
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+      await signInWithEmailAndPassword(auth, email, password);
       router.push('/');
     } catch (error: any) {
        handleAuthError(error);
@@ -129,12 +115,17 @@ export default function LoginPage() {
     }
   };
   
-  const handleEmailSignUp = async (data: SignUpForm) => {
+  const handleEmailSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      toast({ variant: 'destructive', title: 'Error', description: "Passwords don't match." });
+      return;
+    }
     setLoading(true);
+    const auth = getAuth(app);
     try {
-      const auth = getAuth(app);
-      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-      await updateProfile(userCredential.user, { displayName: data.name });
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, { displayName: name });
       router.push('/');
     } catch (error: any) {
       handleAuthError(error);
@@ -142,83 +133,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
-  const SignInContent = () => (
-    <form onSubmit={signInForm.handleSubmit(handleEmailSignIn)} className="space-y-4">
-        <div className="space-y-2">
-            <Label htmlFor="email-signin">Email</Label>
-            <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input id="email-signin" type="email" placeholder="you@example.com" {...signInForm.register('email')} className="pl-10" />
-            </div>
-            {signInForm.formState.errors.email && <p className="text-xs text-destructive">{signInForm.formState.errors.email.message}</p>}
-        </div>
-        <div className="space-y-2">
-            <Label htmlFor="password-signin">Password</Label>
-            <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input id="password-signin" type="password" placeholder="••••••••" {...signInForm.register('password')} className="pl-10" />
-            </div>
-            {signInForm.formState.errors.password && <p className="text-xs text-destructive">{signInForm.formState.errors.password.message}</p>}
-        </div>
-        <div className="flex flex-col gap-2 pt-2">
-            <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? <Loader2 className="mr-2 animate-spin" /> : <LogIn className="mr-2" />}
-                Sign In
-            </Button>
-             <p className="text-center text-sm text-muted-foreground">
-                Don't have an account?{' '}
-                <Button variant="link" type="button" onClick={() => setIsSigningUp(true)} className="p-0 h-auto">Sign up</Button>
-            </p>
-        </div>
-    </form>
-  );
-
-  const SignUpContent = () => (
-     <form onSubmit={signUpForm.handleSubmit(handleEmailSignUp)} className="space-y-4">
-        <div className="space-y-2">
-            <Label htmlFor="name-signup">Full Name</Label>
-            <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input id="name-signup" type="text" placeholder="John Doe" {...signUpForm.register('name')} className="pl-10" />
-            </div>
-            {signUpForm.formState.errors.name && <p className="text-xs text-destructive">{signUpForm.formState.errors.name.message}</p>}
-        </div>
-        <div className="space-y-2">
-            <Label htmlFor="email-signup">Email</Label>
-            <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input id="email-signup" type="email" placeholder="you@example.com" {...signUpForm.register('email')} className="pl-10" />
-            </div>
-            {signUpForm.formState.errors.email && <p className="text-xs text-destructive">{signUpForm.formState.errors.email.message}</p>}
-        </div>
-        <div className="space-y-2">
-            <Label htmlFor="password-signup">Password</Label>
-            <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input id="password-signup" type="password" placeholder="••••••••" {...signUpForm.register('password')} className="pl-10" />
-            </div>
-            {signUpForm.formState.errors.password && <p className="text-xs text-destructive">{signUpForm.formState.errors.password.message}</p>}
-        </div>
-         <div className="space-y-2">
-            <Label htmlFor="confirmPassword-signup">Confirm Password</Label>
-            <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input id="confirmPassword-signup" type="password" placeholder="••••••••" {...signUpForm.register('confirmPassword')} className="pl-10" />
-            </div>
-            {signUpForm.formState.errors.confirmPassword && <p className="text-xs text-destructive">{signUpForm.formState.errors.confirmPassword.message}</p>}
-        </div>
-        <div className="flex flex-col gap-2 pt-2">
-            <Button type="submit" className="w-full" disabled={loading}>
-                 {loading ? <Loader2 className="mr-2 animate-spin" /> : 'Create Account'}
-            </Button>
-             <p className="text-center text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <Button variant="link" type="button" onClick={() => setIsSigningUp(false)} className="p-0 h-auto">Sign in</Button>
-            </p>
-        </div>
-    </form>
-  );
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
@@ -234,7 +148,77 @@ export default function LoginPage() {
             <CardDescription className="text-center">{isSigningUp ? 'Enter your details to get started.' : 'Sign in with your email or Google account.'}</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            {isSigningUp ? <SignUpContent /> : <SignInContent />}
+            
+            {isSigningUp ? (
+              // Sign Up Form
+              <form onSubmit={handleEmailSignUp} className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="name-signup">Full Name</Label>
+                    <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input id="name-signup" type="text" placeholder="John Doe" value={name} onChange={e => setName(e.target.value)} required className="pl-10" />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="email-signup">Email</Label>
+                    <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input id="email-signup" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required className="pl-10" />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="password-signup">Password</Label>
+                    <div className="relative">
+                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input id="password-signup" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="pl-10" />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="confirmPassword-signup">Confirm Password</Label>
+                    <div className="relative">
+                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input id="confirmPassword-signup" type="password" placeholder="••••••••" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="pl-10" />
+                    </div>
+                </div>
+                <div className="flex flex-col gap-2 pt-2">
+                    <Button type="submit" className="w-full" disabled={loading}>
+                         {loading ? <Loader2 className="mr-2 animate-spin" /> : 'Create Account'}
+                    </Button>
+                     <p className="text-center text-sm text-muted-foreground">
+                        Already have an account?{' '}
+                        <Button variant="link" type="button" onClick={() => setIsSigningUp(false)} className="p-0 h-auto">Sign in</Button>
+                    </p>
+                </div>
+              </form>
+            ) : (
+              // Sign In Form
+              <form onSubmit={handleEmailSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                      <Label htmlFor="email-signin">Email</Label>
+                      <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                          <Input id="email-signin" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required className="pl-10" />
+                      </div>
+                  </div>
+                  <div className="space-y-2">
+                      <Label htmlFor="password-signin">Password</Label>
+                      <div className="relative">
+                          <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                          <Input id="password-signin" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="pl-10" />
+                      </div>
+                  </div>
+                  <div className="flex flex-col gap-2 pt-2">
+                      <Button type="submit" className="w-full" disabled={loading}>
+                          {loading ? <Loader2 className="mr-2 animate-spin" /> : <LogIn className="mr-2" />}
+                          Sign In
+                      </Button>
+                       <p className="text-center text-sm text-muted-foreground">
+                          Don't have an account?{' '}
+                          <Button variant="link" type="button" onClick={() => setIsSigningUp(true)} className="p-0 h-auto">Sign up</Button>
+                      </p>
+                  </div>
+              </form>
+            )}
             
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
