@@ -5,7 +5,7 @@ import { useState, useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, LogOut, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building, MapPin, BarChart, PieChart, Moon, Sun, Check } from 'lucide-react';
+import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building, MapPin, BarChart, PieChart, Moon, Sun, Check } from 'lucide-react';
 import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { useTheme } from "next-themes"
 import { motion } from 'framer-motion';
@@ -20,9 +20,6 @@ import type { CareerPathOutput } from '@/ai/flows/career-path-generator';
 import type { CareerExplorationOutput } from '@/ai/flows/career-explorer';
 import type { CareerOpportunitiesOutput } from '@/ai/flows/career-opportunities';
 import { CareerRoadmap } from '@/components/career-roadmap';
-import { useAuth } from '@/hooks/use-auth';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { InteractiveQuestionnaire } from '@/components/interactive-questionnaire';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Badge } from '@/components/ui/badge';
@@ -48,7 +45,6 @@ export default function MainPage() {
   const [userInput, setUserInput] = useState<UserInput | null>(null);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const { toast } = useToast();
-  const { user, loading: authLoading, signOut } = useAuth();
   const [isQuestionnaireOpen, setIsQuestionnaireOpen] = useState(false);
   const [userPath, setUserPath] = useState<'explore' | 'direct' | null>(null);
 
@@ -457,16 +453,6 @@ export default function MainPage() {
     onExploreSubmit(mappedData);
   }
 
-  if (authLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">
-        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <h1 className="text-2xl font-headline font-semibold">Authenticating...</h1>
-        <p className="text-muted-foreground mt-2">Just a moment, we're checking your credentials.</p>
-      </div>
-    );
-  }
-
   if (loading) {
     let message = 'Charting the course for your new career. Hang tight!';
     if (loadingStage === 'fetching_opportunities') message = 'Analyzing job market data...';
@@ -531,48 +517,6 @@ export default function MainPage() {
     )
   }
 
-  const UserMenu = () => (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-10 w-10">
-            {user?.photoURL ? (
-                <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
-              ) : (
-                <AvatarFallback>
-                  <User className="h-5 w-5" />
-                </AvatarFallback>
-              )}
-          </Avatar>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-56" align="end" forceMount>
-        <div className="flex items-center space-x-2 p-2">
-            <Avatar>
-              {user?.photoURL ? (
-                <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
-              ) : (
-                <AvatarFallback>
-                  <User className="h-5 w-5" />
-                </AvatarFallback>
-              )}
-            </Avatar>
-            <div className='flex-1 min-w-0'>
-                <p className="text-sm font-medium leading-none truncate">{user?.displayName}</p>
-                <p className="text-xs leading-none text-muted-foreground truncate">{user?.email}</p>
-            </div>
-        </div>
-        <div className="flex items-center justify-between mt-2">
-          <Button variant="ghost" className="w-full justify-start" onClick={signOut}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Log out
-          </Button>
-          <ThemeToggle />
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-
   const PathSelection = () => (
     <div className="w-full max-w-4xl mx-auto">
         <motion.div 
@@ -581,7 +525,7 @@ export default function MainPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-            <h1 className="text-5xl font-headline font-bold">Welcome, {user?.displayName || 'Explorer'}!</h1>
+            <h1 className="text-5xl font-headline font-bold">Welcome, Explorer!</h1>
             <p className="mt-4 text-lg text-muted-foreground">
                 How would you like to start your journey today?
             </p>
@@ -738,7 +682,7 @@ export default function MainPage() {
     <>
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <div className="absolute top-4 right-4">
-            {user && <UserMenu />}
+            <ThemeToggle />
         </div>
         
         <div className="w-full flex-1 flex items-center justify-center">
