@@ -16,7 +16,7 @@ import {z} from 'genkit';
 const CareerExplorationInputSchema = z.object({
   career: z.string().describe('The general career field the user is interested in, e.g., "Software Engineering".'),
   currentRole: z.string().optional().describe("The user's current role or educational background (e.g., '12th class', 'UG student')."),
-  interests: z.string().optional().describe("A list of the user's interests to provide personalized suggestions."),
+  interests: z.string().optional().describe("A comma-separated list of the user's interests to provide personalized suggestions."),
 });
 export type CareerExplorationInput = z.infer<typeof CareerExplorationInputSchema>;
 
@@ -26,15 +26,16 @@ const AcademicSuggestionSchema = z.object({
 });
 
 const InterestBasedSuggestionSchema = z.object({
-    guidance: z.string().describe("Personalized guidance based on the user's interests, suggesting how their passions align with potential career avenues."),
-    relatedRoles: z.array(z.string()).describe("A list of specific job titles or career paths that align well with the user's stated interests."),
+    interest: z.string().describe("The specific interest this suggestion is based on (e.g., 'Art', 'Technology')."),
+    guidance: z.string().describe("Personalized guidance explaining how this specific interest aligns with potential career avenues related to the main desired career."),
+    relatedRoles: z.array(z.string()).describe("A list of specific job titles or career paths that align well with this particular interest."),
 });
 
 const CareerExplorationOutputSchema = z.object({
     description: z.string().describe("A detailed overview of the career field."),
     specificRoles: z.array(z.string()).describe("A comprehensive list of specific, in-depth job titles or roles that exist within this career field."),
     academicSuggestions: z.array(AcademicSuggestionSchema).optional().describe("Actionable academic or competitive suggestions based on the user's educational stage."),
-    interestSuggestions: InterestBasedSuggestionSchema.optional().describe("Personalized career suggestions based on the user's provided interests."),
+    interestSuggestions: z.array(InterestBasedSuggestionSchema).optional().describe("A list of personalized career suggestions, with each object in the list corresponding to a single interest provided by the user."),
 });
 export type CareerExplorationOutput = z.infer<typeof CareerExplorationOutputSchema>;
 
@@ -58,8 +59,12 @@ Your task is to provide a comprehensive and clear overview of the requested care
 
 2.  **Interest-Based Suggestions (interestSuggestions):**
     *   **This section is conditional.** Only generate it if the user has provided their 'interests'.
-    *   **Guidance (guidance):** Write a brief, encouraging paragraph that connects the user's interests to their desired career or related fields. Suggest how their passions could translate into a fulfilling profession.
-    *   **Related Roles (relatedRoles):** Based on their interests, list a few specific job titles or alternative career paths they might also find appealing. This should be distinct from the main 'specificRoles' list.
+    *   The user's interests will be a comma-separated string. You must process each interest individually.
+    *   For **each** interest, create a separate object in the 'interestSuggestions' array.
+    *   Each object must contain:
+        *   **interest:** The single interest from the user's list that this suggestion is about.
+        *   **guidance:** A brief, encouraging paragraph that connects this specific interest to their desired career or related fields. Suggest how this passion could translate into a fulfilling profession.
+        *   **relatedRoles:** Based on this single interest, list a few specific job titles or alternative career paths they might also find appealing. This should be distinct from the main 'specificRoles' list.
 
 3.  **Academic Suggestions (academicSuggestions):**
     *   This is a critical step. Based on the user's 'currentRole', provide highly relevant, popular, and actionable academic suggestions.

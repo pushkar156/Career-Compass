@@ -73,24 +73,33 @@ export default function MainPage() {
               </header>
 
               <main>
-                  {data.interestSuggestions && (
+                  {data.interestSuggestions && data.interestSuggestions.length > 0 && (
                       <section className="mb-12">
                           <h2 className="text-2xl font-headline font-semibold mb-4 flex items-center gap-3">
                               <Sparkles className="h-7 w-7 text-primary" />
                               According to Your Interests
                           </h2>
-                          <p className="text-muted-foreground mb-6">{data.interestSuggestions.guidance}</p>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                              {data.interestSuggestions.relatedRoles.map(role => (
-                                  <Card key={role} className="hover:shadow-lg hover:border-primary transition-all cursor-pointer group" onClick={() => onSelectRole(role)}>
-                                      <CardContent className="p-6 flex items-center justify-between">
-                                          <div className="flex items-center">
-                                              <div className="p-3 bg-primary/10 rounded-lg mr-4">
-                                                  <Lightbulb className="h-6 w-6 text-primary" />
-                                              </div>
-                                              <h3 className="font-semibold text-base">{role}</h3>
+                          <div className="space-y-6">
+                              {data.interestSuggestions.map((suggestion, index) => (
+                                  <Card key={index} className="bg-secondary/30 border">
+                                      <CardHeader>
+                                          <CardTitle className="font-headline text-xl">Because you're interested in "{suggestion.interest}"...</CardTitle>
+                                      </CardHeader>
+                                      <CardContent>
+                                          <p className="text-muted-foreground mb-4">{suggestion.guidance}</p>
+                                          <h4 className="font-semibold mb-2">Related Roles to Explore:</h4>
+                                          <div className="flex flex-wrap gap-2">
+                                              {suggestion.relatedRoles.map(role => (
+                                                  <Badge 
+                                                    key={role} 
+                                                    variant="secondary" 
+                                                    className="cursor-pointer hover:bg-primary/20"
+                                                    onClick={() => onSelectRole(role)}
+                                                  >
+                                                      {role}
+                                                  </Badge>
+                                              ))}
                                           </div>
-                                          <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                                       </CardContent>
                                   </Card>
                               ))}
@@ -480,16 +489,16 @@ export default function MainPage() {
   const handleBackToExplore = () => {
       setFinalResult(null);
       setSelectedRole(null);
-      setExplorationResult(null);
+      setExplorationResult(null); // This will trigger a refetch if needed, or just go back.
       if (!userInput) { 
           setUserPath(null);
       }
   }
 
   const handleBackToRoleSelection = () => {
-      setOpportunitiesResult(null);
-      setExplorationResult(null);
-      setSelectedRole(selectedRole); 
+      setOpportunitiesResult(null); // Clear opportunities result
+      setExplorationResult(null); // Clear exploration to show role selection
+      setSelectedRole(selectedRole); // Keep the selected role
   }
 
   const handleQuestionnaireSubmit = (data: any) => {
