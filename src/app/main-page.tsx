@@ -73,6 +73,33 @@ export default function MainPage() {
               </header>
 
               <main>
+                  {data.interestSuggestions && (
+                      <section className="mb-12">
+                          <h2 className="text-2xl font-headline font-semibold mb-4 flex items-center gap-3">
+                              <Sparkles className="h-7 w-7 text-primary" />
+                              According to Your Interests
+                          </h2>
+                          <p className="text-muted-foreground mb-6">{data.interestSuggestions.guidance}</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {data.interestSuggestions.relatedRoles.map(role => (
+                                  <Card key={role} className="hover:shadow-lg hover:border-primary transition-all cursor-pointer group" onClick={() => onSelectRole(role)}>
+                                      <CardContent className="p-6 flex items-center justify-between">
+                                          <div className="flex items-center">
+                                              <div className="p-3 bg-primary/10 rounded-lg mr-4">
+                                                  <Lightbulb className="h-6 w-6 text-primary" />
+                                              </div>
+                                              <h3 className="font-semibold text-base">{role}</h3>
+                                          </div>
+                                          <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                      </CardContent>
+                                  </Card>
+                              ))}
+                          </div>
+                          <hr className="my-8 border-border" />
+                      </section>
+                  )}
+
+
                   {data.academicSuggestions && data.academicSuggestions.length > 0 && (
                       <section className="mb-12">
                           <h2 className="text-2xl font-headline font-semibold mb-4 flex items-center gap-3">
@@ -356,7 +383,7 @@ export default function MainPage() {
     setExplorationResult(null);
     setUserInput(data);
     try {
-      const response = await exploreCareerAction({ career: data.desiredCareer, currentRole: data.currentRole });
+      const response = await exploreCareerAction({ career: data.desiredCareer, currentRole: data.currentRole, interests: data.interests });
 
       if (response.success) {
         setExplorationResult(response.data);

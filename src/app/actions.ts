@@ -34,9 +34,10 @@ export async function generateCareerPathAction(input: {
 const exploreCareerSchema = z.object({
     career: z.string().min(3, { message: 'Career must be at least 3 characters long.' }),
     currentRole: z.string().optional(),
+    interests: z.string().optional(),
 });
 
-export async function exploreCareerAction(input: { career: string, currentRole?: string }): Promise<{ success: true; data: CareerExplorationOutput } | { success: false; error: string }> {
+export async function exploreCareerAction(input: { career: string, currentRole?: string, interests?: string }): Promise<{ success: true; data: CareerExplorationOutput } | { success: false; error: string }> {
     const validation = exploreCareerSchema.safeParse(input);
     if (!validation.success) {
         return { success: false, error: validation.error.errors[0].message };
