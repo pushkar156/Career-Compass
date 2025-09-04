@@ -5,7 +5,7 @@ import { useState, useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building, MapPin, BarChart, PieChart, Moon, Sun, Check } from 'lucide-react';
+import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building, MapPin, BarChart, PieChart, Moon, Sun, Check, BookCopy } from 'lucide-react';
 import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { useTheme } from "next-themes"
 import { motion } from 'framer-motion';
@@ -24,6 +24,7 @@ import { InteractiveQuestionnaire } from '@/components/interactive-questionnaire
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 
 const FormSchema = z.object({
@@ -72,6 +73,31 @@ export default function MainPage() {
               </header>
 
               <main>
+                  {data.academicSuggestions && data.academicSuggestions.length > 0 && (
+                      <section className="mb-12">
+                          <h2 className="text-2xl font-headline font-semibold mb-4 flex items-center gap-3">
+                              <BookCopy className="h-7 w-7 text-primary" />
+                              Academic & Competitive Suggestions
+                          </h2>
+                          <p className="text-muted-foreground mb-6">
+                              Based on your current stage, here are some popular and relevant next steps to consider for a career in "{userInput.desiredCareer}".
+                          </p>
+                          <Accordion type="single" collapsible className="w-full space-y-2">
+                              {data.academicSuggestions.map((suggestion, index) => (
+                                  <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/30 rounded-md px-4 border">
+                                      <AccordionTrigger className="text-left hover:no-underline">
+                                          <span className="font-medium text-base flex-1">{suggestion.title}</span>
+                                      </AccordionTrigger>
+                                      <AccordionContent className="pb-4 text-muted-foreground">
+                                          {suggestion.description}
+                                      </AccordionContent>
+                                  </AccordionItem>
+                              ))}
+                          </Accordion>
+                      </section>
+                  )}
+
+
                   <h2 className="text-2xl font-headline font-semibold mb-4">Specific Roles & Specializations</h2>
                   <p className="text-muted-foreground mb-6">
                       This is your starting point. Select a role below to generate a detailed, step-by-step learning roadmap.
@@ -330,7 +356,7 @@ export default function MainPage() {
     setExplorationResult(null);
     setUserInput(data);
     try {
-      const response = await exploreCareerAction({ career: data.desiredCareer });
+      const response = await exploreCareerAction({ career: data.desiredCareer, currentRole: data.currentRole });
 
       if (response.success) {
         setExplorationResult(response.data);
@@ -620,7 +646,7 @@ export default function MainPage() {
                             <FormControl>
                             <div className="relative">
                                 <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                <Input placeholder="e.g., 'Computer Science Student'" {...field} className="pl-10" />
+                                <Input placeholder="e.g., '12th class student'" {...field} className="pl-10" />
                             </div>
                             </FormControl>
                         </FormItem>
