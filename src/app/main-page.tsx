@@ -8,7 +8,6 @@ import { z } from 'zod';
 import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building, MapPin, BarChart, PieChart, Moon, Sun, Check, BookCopy } from 'lucide-react';
 import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { useTheme } from "next-themes"
-import { motion } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -140,10 +139,10 @@ export default function MainPage() {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {data.specificRoles.map(role => (
-                          <Card key={role} className="hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group" onClick={() => onSelectRole(role)}>
+                          <Card key={role} className="hover:shadow-lg hover:border-primary/50 group cursor-pointer" onClick={() => onSelectRole(role)}>
                               <CardContent className="p-6 flex items-center justify-between">
                                   <h3 className="font-semibold text-base">{role}</h3>
-                                  <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                  <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
                               </CardContent>
                           </Card>
                       ))}
@@ -556,8 +555,8 @@ export default function MainPage() {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
-                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 dark:-rotate-90 dark:scale-0" />
+                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 dark:rotate-0 dark:scale-100" />
                     <span className="sr-only">Toggle theme</span>
                 </Button>
             </DropdownMenuTrigger>

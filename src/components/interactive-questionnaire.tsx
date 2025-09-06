@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { motion, AnimatePresence } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -273,14 +272,9 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
                     </FormItem>
                 )}
                 />
-                <AnimatePresence>
+                
                     {watchLearningStyles?.includes('other') && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.3 }}
-                        >
+                        <div>
                             <FormField
                                 control={methods.control}
                                 name="otherLearningStyle"
@@ -293,9 +287,8 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
                                     </FormItem>
                                 )}
                             />
-                        </motion.div>
+                        </div>
                     )}
-                </AnimatePresence>
             
             <FormField
                 control={methods.control}
@@ -331,18 +324,12 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
             </SheetHeader>
 
             <div className="p-6 flex-1 overflow-y-auto">
-                <AnimatePresence mode="wait">
-                    <motion.div
+                    <div
                         key={currentStep}
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -50 }}
-                        transition={{ duration: 0.3 }}
                         className="space-y-6"
                     >
                         {renderStepContent()}
-                    </motion.div>
-                </AnimatePresence>
+                    </div>
             </div>
 
             <div className="p-6 border-t mt-auto bg-slate-50 dark:bg-slate-800/50">

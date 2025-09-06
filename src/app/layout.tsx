@@ -5,7 +5,6 @@ import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/hooks/use-auth';
 import { ThemeProvider } from '@/components/theme-provider';
-import { Particles } from '@/components/particles';
 
 export const metadata: Metadata = {
   title: 'Career Compass',
@@ -33,7 +32,6 @@ export default function RootLayout({
             disableTransitionOnChange
         >
           <AuthProvider>
-            <Particles />
             {children}
           </AuthProvider>
           <Toaster />

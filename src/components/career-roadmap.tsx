@@ -29,7 +29,6 @@ import {
   Lightbulb,
   CheckCircle,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 interface CareerRoadmapProps {
   data: CareerPathOutput;
