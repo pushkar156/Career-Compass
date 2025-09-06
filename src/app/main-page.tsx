@@ -373,38 +373,34 @@ export default function MainPage() {
     </div>
   );
 
-  async function onExploreSubmit(data: UserInput) {
+  async function onSubmit(data: UserInput) {
     setLoading(true);
     setLoadingStage('exploring');
     setFinalResult(null);
     setExplorationResult(null);
     setUserInput(data);
 
-    if (userPath === 'direct') {
-        onGenerateRoadmap(data.desiredCareer, data);
-    } else {
-        try {
-            const response = await exploreCareerAction({ career: data.desiredCareer, currentRole: data.currentRole, interests: data.interests });
+    try {
+      const response = await exploreCareerAction({ career: data.desiredCareer, currentRole: data.currentRole, interests: data.interests });
 
-            if (response.success) {
-                setExplorationResult(response.data);
-            } else {
-                toast({
-                    variant: 'destructive',
-                    title: 'Error',
-                    description: response.error,
-                });
-            }
-        } catch (error) {
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'An unexpected error occurred during exploration. Please try again.',
-            });
-        } finally {
-            setLoading(false);
-            setLoadingStage(null);
-        }
+      if (response.success) {
+        setExplorationResult(response.data);
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: response.error,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'An unexpected error occurred during exploration. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+      setLoadingStage(null);
     }
   }
 
@@ -487,6 +483,9 @@ export default function MainPage() {
       setExplorationResult(null); // This will trigger a refetch if needed, or just go back.
       if (!userInput) { 
           setUserPath(null);
+      } else {
+         // Re-run the exploration to show the previous results
+         onSubmit(userInput);
       }
   }
 
@@ -507,7 +506,7 @@ export default function MainPage() {
       interests: `Interests: ${data.step3.interests}. Skills: ${data.step3.skills}. Prefers learning styles: ${learningStyles.join(', ')}.`,
     }
     form.reset(mappedData);
-    onExploreSubmit(mappedData);
+    onSubmit(mappedData);
     setIsQuestionnaireOpen(false);
   }
 
@@ -618,27 +617,33 @@ export default function MainPage() {
     </div>
   );
 
-  const DirectInputPath = () => (
+  const InputForm = () => (
     <div className="w-full max-w-2xl mx-auto">
         <Button variant="ghost" onClick={() => setUserPath(null)} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4"/>Back to choices</Button>
         <Card>
             <CardHeader>
-                <CardTitle className="font-headline text-2xl text-center">Chart Your Course</CardTitle>
-                <CardDescription className="text-center">Tell us your goal, and we'll build the roadmap.</CardDescription>
+                <CardTitle className="font-headline text-2xl text-center">
+                    {userPath === 'direct' ? 'Chart Your Course' : 'Explore Your Options'}
+                </CardTitle>
+                <CardDescription className="text-center">
+                    {userPath === 'direct' 
+                        ? "Tell us your goal, and we'll explore roles within that field." 
+                        : "Tell us about a field you're curious about."}
+                </CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
-                <form onSubmit={form.handleSubmit(onExploreSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <FormField
                     control={form.control}
                     name="desiredCareer"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Your Desired Career or Skill</FormLabel>
+                        <FormLabel>Your Desired Career or Field</FormLabel>
                         <FormControl>
                             <div className="relative">
                             <Lightbulb className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <Input placeholder="e.g., 'Software Engineer' or 'Data Science'" {...field} className="pl-10" />
+                            <Input placeholder="e.g., 'Software Engineering' or 'Digital Marketing'" {...field} className="pl-10" />
                             </div>
                         </FormControl>
                         <FormMessage />
@@ -678,7 +683,8 @@ export default function MainPage() {
                     />
                     </div>
                     <Button type="submit" className="w-full !mt-8" size="lg" disabled={loading}>
-                    Generate My Roadmap
+                        Explore Roles
+                        <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                 </form>
                 </Form>
@@ -721,8 +727,8 @@ export default function MainPage() {
         </div>
         
         {!userPath && <PathSelection />}
-        {userPath === 'direct' && <DirectInputPath />}
-        {userPath === 'explore' && <ExplorationPath />}
+        {userPath === 'direct' && <InputForm />}
+        {userPath === 'explore' && <InputForm />}
     </div>
 
     <InteractiveQuestionnaire 
@@ -733,3 +739,5 @@ export default function MainPage() {
     </>
   );
 }
+
+    
