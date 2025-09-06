@@ -112,11 +112,8 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
   return (
     <div className="min-h-screen p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl mx-auto">
-        <motion.header 
+        <header 
           className="mb-8 flex items-center justify-between"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
         >
           <div>
             <h1 className="text-4xl font-headline font-bold">Your Custom Roadmap</h1>
@@ -126,15 +123,11 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
             <ArrowLeft className="mr-2 h-4 w-4" />
             Start Over
           </Button>
-        </motion.header>
+        </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <aside className="lg:col-span-1 space-y-8">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
+            <div>
               <Card>
                 <CardHeader>
                   <CardTitle className="font-headline flex items-center gap-2"><User />Your Profile</CardTitle>
@@ -167,13 +160,9 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                   )}
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
             
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
+            <div>
               <Card>
                 <CardHeader>
                   <CardTitle className="font-headline">Progress Tracker</CardTitle>
@@ -186,14 +175,10 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                   <p className="text-center text-sm mt-2 font-bold text-primary">{Math.round(progress)}% Complete</p>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
 
              {data.advice && data.advice.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
+              <div>
                 <Card>
                   <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2">
@@ -215,17 +200,13 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                     </ul>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             )}
 
           </aside>
 
           <main className="lg:col-span-2">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-            >
+            <div>
             <Tabs defaultValue="learning-path" className="w-full">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="learning-path"><Goal className="mr-2 h-4 w-4" />Learning Path</TabsTrigger>
@@ -386,7 +367,7 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
               </TabsContent>
 
             </Tabs>
-            </motion.div>
+            </div>
           </main>
         </div>
       </div>

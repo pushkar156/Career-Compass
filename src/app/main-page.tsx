@@ -75,13 +75,13 @@ export default function MainPage() {
               <main>
                   {data.interestSuggestions && data.interestSuggestions.length > 0 && (
                       <section className="mb-12">
-                          <h2 className="text-2xl font-headline font-semibold mb-4 flex items-center gap-3">
-                              <Sparkles className="h-7 w-7 text-primary" />
+                          <h2 className="text-2xl font-headline font-semibold mb-4 flex items-center">
+                              <Sparkles className="h-6 w-6 text-primary mr-2" />
                               According to Your Interests
                           </h2>
-                          <div className="space-y-6">
+                          <div className="space-y-4">
                               {data.interestSuggestions.map((suggestion, index) => (
-                                  <Card key={index} className="bg-secondary/30 border">
+                                  <Card key={index}>
                                       <CardHeader>
                                           <CardTitle className="font-headline text-xl">Because you're interested in "{suggestion.interest}"...</CardTitle>
                                       </CardHeader>
@@ -104,27 +104,27 @@ export default function MainPage() {
                                   </Card>
                               ))}
                           </div>
-                          <hr className="my-8 border-border" />
+                          <hr className="my-8 border-border/50" />
                       </section>
                   )}
 
 
                   {data.academicSuggestions && data.academicSuggestions.length > 0 && (
                       <section className="mb-12">
-                          <h2 className="text-2xl font-headline font-semibold mb-4 flex items-center gap-3">
-                              <BookCopy className="h-7 w-7 text-primary" />
+                          <h2 className="text-2xl font-headline font-semibold mb-4 flex items-center">
+                              <GraduationCap className="h-6 w-6 text-primary mr-2" />
                               Academic & Competitive Suggestions
                           </h2>
                           <p className="text-muted-foreground mb-6">
                               Based on your current stage, here are some popular and relevant next steps to consider for a career in "{userInput.desiredCareer}".
                           </p>
-                          <Accordion type="single" collapsible className="w-full space-y-2">
+                          <Accordion type="single" collapsible className="w-full">
                               {data.academicSuggestions.map((suggestion, index) => (
-                                  <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/30 rounded-md px-4 border">
-                                      <AccordionTrigger className="text-left hover:no-underline">
+                                  <AccordionItem value={`item-${index}`} key={index}>
+                                      <AccordionTrigger className="text-left">
                                           <span className="font-medium text-base flex-1">{suggestion.title}</span>
                                       </AccordionTrigger>
-                                      <AccordionContent className="pb-4 text-muted-foreground">
+                                      <AccordionContent>
                                           {suggestion.description}
                                       </AccordionContent>
                                   </AccordionItem>
@@ -140,14 +140,9 @@ export default function MainPage() {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {data.specificRoles.map(role => (
-                          <Card key={role} className="hover:shadow-lg hover:border-primary transition-all cursor-pointer group" onClick={() => onSelectRole(role)}>
+                          <Card key={role} className="hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group" onClick={() => onSelectRole(role)}>
                               <CardContent className="p-6 flex items-center justify-between">
-                                  <div className="flex items-center">
-                                      <div className="p-3 bg-primary/10 rounded-lg mr-4">
-                                          <GraduationCap className="h-6 w-6 text-primary" />
-                                      </div>
-                                      <h3 className="font-semibold text-base">{role}</h3>
-                                  </div>
+                                  <h3 className="font-semibold text-base">{role}</h3>
                                   <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                               </CardContent>
                           </Card>
@@ -196,19 +191,15 @@ export default function MainPage() {
 
                 <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                      <Card className="lg:col-span-2">
-                        <CardHeader className="flex flex-row items-center gap-4">
-                            <TrendingUp className="h-8 w-8 text-primary" />
-                            <div>
-                                <CardTitle className="font-headline text-2xl">The Future Outlook</CardTitle>
-                                <CardDescription>Upcoming trends and the long-term trajectory for {role}s.</CardDescription>
-                            </div>
+                        <CardHeader>
+                            <CardTitle className="font-headline text-2xl flex items-center gap-2"><TrendingUp />The Future Outlook</CardTitle>
+                            <CardDescription>Upcoming trends and the long-term trajectory for {role}s.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                             <ul className="space-y-3">
+                             <ul className="space-y-3 list-disc list-inside text-muted-foreground">
                                 {data.upcomingOpportunities.map((point, index) => (
-                                    <li key={index} className="flex items-start gap-3">
-                                        <CheckCircle className="h-5 w-5 text-green-500 mt-1 shrink-0" />
-                                        <span className="text-muted-foreground">{point}</span>
+                                    <li key={index}>
+                                        <span>{point}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -303,11 +294,10 @@ export default function MainPage() {
                             <CardDescription>A summary of today's job landscape.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                           <ul className="space-y-3">
+                           <ul className="space-y-3 list-disc list-inside text-muted-foreground">
                                 {data.existingJobMarket.summary.map((point, index) => (
-                                    <li key={index} className="flex items-start gap-3">
-                                        <Check className="h-5 w-5 text-primary mt-1 shrink-0" />
-                                        <span className="text-muted-foreground">{point}</span>
+                                    <li key={index}>
+                                        <span>{point}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -343,44 +333,42 @@ export default function MainPage() {
 
   const RoleSelectionScreen = ({ role, onGenerateRoadmap, onExploreOpportunities, onBack }: { role: string; onGenerateRoadmap: () => void; onExploreOpportunities: () => void; onBack: () => void; }) => (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-4xl mx-auto text-center">
-            <Button variant="ghost" onClick={onBack} className="absolute top-6 left-6"><ArrowLeft className="mr-2 h-4 w-4"/>Back to exploration</Button>
-            <div className="text-center mb-10">
-                <h1 className="text-5xl font-headline font-bold">You've selected: {role}</h1>
-                <p className="mt-4 text-lg text-muted-foreground">What would you like to do next?</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card className="text-center p-8 transition-all hover:scale-105 hover:shadow-primary/20">
-                    <CardHeader>
-                        <Route className="h-12 w-12 text-primary mx-auto mb-4" />
-                        <CardTitle className="font-headline text-3xl">Custom Roadmap</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground mb-6">
-                            Generate a personalized, step-by-step learning path to master this role.
-                        </p>
-                        <Button size="lg" onClick={onGenerateRoadmap}>
-                            Create My Plan
-                            <ArrowRight className="ml-2 h-5 w-5" />
-                        </Button>
-                    </CardContent>
-                </Card>
-                <Card className="text-center p-8 transition-all hover:scale-105 hover:shadow-primary/20">
-                    <CardHeader>
-                        <TrendingUp className="h-12 w-12 text-primary mx-auto mb-4" />
-                        <CardTitle className="font-headline text-3xl">Explore Opportunities</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground mb-6">
-                            Get insights into job trends, salary expectations, and market demand for this role.
-                        </p>
-                        <Button size="lg" onClick={onExploreOpportunities}>
-                            Analyze Career
-                            <ArrowRight className="ml-2 h-5 w-5" />
-                        </Button>
-                    </CardContent>
-                </Card>
-            </div>
+        <Button variant="ghost" onClick={onBack} className="absolute top-6 left-6"><ArrowLeft className="mr-2 h-4 w-4"/>Back to exploration</Button>
+        <div className="text-center mb-10">
+            <h1 className="text-5xl font-headline font-bold">You've selected: {role}</h1>
+            <p className="mt-4 text-lg text-muted-foreground">What would you like to do next?</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+            <Card className="text-center p-8">
+                <CardHeader>
+                    <Route className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <CardTitle className="font-headline text-3xl">Custom Roadmap</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground mb-6">
+                        Generate a personalized, step-by-step learning path to master this role.
+                    </p>
+                    <Button size="lg" onClick={onGenerateRoadmap}>
+                        Create My Plan
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                </CardContent>
+            </Card>
+            <Card className="text-center p-8">
+                <CardHeader>
+                    <TrendingUp className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <CardTitle className="font-headline text-3xl">Explore Opportunities</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground mb-6">
+                        Get insights into job trends, salary expectations, and market demand for this role.
+                    </p>
+                    <Button size="lg" onClick={onExploreOpportunities}>
+                        Analyze Career
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                </CardContent>
+            </Card>
         </div>
     </div>
   );
@@ -590,68 +578,43 @@ export default function MainPage() {
   }
 
   const PathSelection = () => (
-    <div className="w-full max-w-4xl mx-auto">
-        <motion.div 
-          className="text-center mb-10"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-            <h1 className="text-5xl font-headline font-bold">Welcome, Explorer!</h1>
-            <p className="mt-4 text-lg text-muted-foreground">
-                How would you like to start your journey today?
-            </p>
-        </motion.div>
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-8"
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.2,
-                delayChildren: 0.3,
-              }
-            }
-          }}
-        >
-            <motion.div variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}>
-              <Card className="text-center p-8 h-full flex flex-col justify-between transition-all duration-300 hover:scale-[1.03] hover:shadow-primary/20">
-                  <CardHeader>
-                      <Search className="h-12 w-12 text-primary mx-auto mb-4" />
-                      <CardTitle className="font-headline text-3xl">Explore Career Options</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                      <p className="text-muted-foreground mb-6">
-                          Not sure where to start? Discover your passions and find career paths that match your interests.
-                      </p>
-                      <Button size="lg" onClick={() => setUserPath('explore')}>
-                          Guide Me
-                          <ArrowRight className="ml-2 h-5 w-5" />
-                      </Button>
-                  </CardContent>
-              </Card>
-            </motion.div>
-            <motion.div variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}>
-              <Card className="text-center p-8 h-full flex flex-col justify-between transition-all duration-300 hover:scale-[1.03] hover:shadow-primary/20">
-                  <CardHeader>
-                      <Route className="h-12 w-12 text-primary mx-auto mb-4" />
-                      <CardTitle className="font-headline text-3xl">I Know My Path</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                      <p className="text-muted-foreground mb-6">
-                          Already have a dream job in mind? Get a detailed, step-by-step roadmap to make it a reality.
-                      </p>
-                      <Button size="lg" onClick={() => setUserPath('direct')}>
-                          Show Me The Way
-                          <ArrowRight className="ml-2 h-5 w-5" />
-                      </Button>
-                  </CardContent>
-              </Card>
-            </motion.div>
-        </motion.div>
+    <div className="text-center max-w-4xl mx-auto">
+        <h1 className="text-5xl font-headline font-bold">Welcome, Explorer!</h1>
+        <p className="mt-4 text-lg text-muted-foreground">
+            How would you like to start your journey today?
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+            <Card className="text-center p-8">
+                <CardHeader>
+                    <Search className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <CardTitle className="font-headline text-3xl">Explore Career Options</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground mb-6">
+                        Not sure where to start? Discover your passions and find career paths that match your interests.
+                    </p>
+                    <Button size="lg" onClick={() => setUserPath('explore')}>
+                        Guide Me
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                </CardContent>
+            </Card>
+            <Card className="text-center p-8">
+                <CardHeader>
+                    <Route className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <CardTitle className="font-headline text-3xl">I Know My Path</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground mb-6">
+                        Already have a dream job in mind? Get a detailed, step-by-step roadmap to make it a reality.
+                    </p>
+                    <Button size="lg" onClick={() => setUserPath('direct')}>
+                        Show Me The Way
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
     </div>
   );
 
@@ -731,7 +694,7 @@ export default function MainPage() {
           <h2 className="text-4xl font-headline font-bold">Your Guided Journey</h2>
           <p className="mt-4 text-lg text-muted-foreground">Answer a few questions to build a hyper-personalized career plan.</p>
         </div>
-        <Card className="text-center p-8 transition-all hover:scale-[1.02] hover:shadow-primary/10">
+        <Card className="text-center p-8">
             <CardHeader>
                 <Handshake className="h-12 w-12 text-primary mx-auto mb-4" />
                 <CardTitle className="font-headline text-3xl">Let's Get to Know You</CardTitle>
@@ -752,16 +715,14 @@ export default function MainPage() {
 
   return (
     <>
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
         <div className="absolute top-4 right-4">
             <ThemeToggle />
         </div>
         
-        <div className="w-full flex-1 flex items-center justify-center">
-            {!userPath && <PathSelection />}
-            {userPath === 'direct' && <DirectInputPath />}
-            {userPath === 'explore' && <ExplorationPath />}
-        </div>
+        {!userPath && <PathSelection />}
+        {userPath === 'direct' && <DirectInputPath />}
+        {userPath === 'explore' && <ExplorationPath />}
     </div>
 
     <InteractiveQuestionnaire 
