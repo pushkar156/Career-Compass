@@ -391,44 +391,51 @@ export default function MainPage() {
     setFinalResult(null);
     setExplorationResult(null);
     setUserInput(data);
-    try {
-      const response = await exploreCareerAction({ career: data.desiredCareer, currentRole: data.currentRole, interests: data.interests });
 
-      if (response.success) {
-        setExplorationResult(response.data);
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: response.error,
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'An unexpected error occurred during exploration. Please try again.',
-      });
-    } finally {
-      setLoading(false);
-      setLoadingStage(null);
+    if (userPath === 'direct') {
+        onGenerateRoadmap(data.desiredCareer, data);
+    } else {
+        try {
+            const response = await exploreCareerAction({ career: data.desiredCareer, currentRole: data.currentRole, interests: data.interests });
+
+            if (response.success) {
+                setExplorationResult(response.data);
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: 'Error',
+                    description: response.error,
+                });
+            }
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'An unexpected error occurred during exploration. Please try again.',
+            });
+        } finally {
+            setLoading(false);
+            setLoadingStage(null);
+        }
     }
   }
 
-  async function onGenerateRoadmap(specificRole: string) {
-    if (!userInput) return;
+  async function onGenerateRoadmap(specificRole: string, currentData: UserInput | null) {
+    const finalUserInput = currentData || userInput;
+    if (!finalUserInput) return;
+
     setLoading(true);
     setLoadingStage('generating');
     setFinalResult(null);
     
-    const updatedInput = { ...userInput, desiredCareer: specificRole };
+    const updatedInput = { ...finalUserInput, desiredCareer: specificRole };
     setUserInput(updatedInput);
 
     try {
       const response = await generateCareerPathAction({ 
         career: specificRole, 
-        currentRole: userInput.currentRole, 
-        interests: userInput.interests 
+        currentRole: finalUserInput.currentRole, 
+        interests: finalUserInput.interests 
       });
 
       if (response.success) {
@@ -513,18 +520,21 @@ export default function MainPage() {
     }
     form.reset(mappedData);
     onExploreSubmit(mappedData);
+    setIsQuestionnaireOpen(false);
   }
 
   if (loading) {
     let message = 'Charting the course for your new career. Hang tight!';
+    if (loadingStage === 'generating') message = 'Building your personalized roadmap...';
+    if (loadingStage === 'exploring') message = 'Discovering career paths based on your interests...';
     if (loadingStage === 'fetching_opportunities') message = 'Analyzing job market data...';
 
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
         <h1 className="text-2xl font-headline font-semibold">
-          {loadingStage === 'exploring' && 'Exploring possibilities...'}
-          {loadingStage === 'generating' && 'Generating your future...'}
+          {loadingStage === 'exploring' && 'Exploring Possibilities...'}
+          {loadingStage === 'generating' && 'Generating Your Future...'}
           {loadingStage === 'fetching_opportunities' && 'Gathering Insights...'}
         </h1>
         <p className="text-muted-foreground mt-2">{message}</p>
@@ -541,7 +551,7 @@ export default function MainPage() {
   }
 
   if (selectedRole) {
-      return <RoleSelectionScreen role={selectedRole} onGenerateRoadmap={() => onGenerateRoadmap(selectedRole)} onExploreOpportunities={() => onExploreOpportunities(selectedRole)} onBack={handleBackToExplore} />
+      return <RoleSelectionScreen role={selectedRole} onGenerateRoadmap={() => onGenerateRoadmap(selectedRole, userInput)} onExploreOpportunities={() => onExploreOpportunities(selectedRole)} onBack={handleBackToExplore} />
   }
 
   if (explorationResult && userInput) {
@@ -665,7 +675,7 @@ export default function MainPage() {
                         <FormControl>
                             <div className="relative">
                             <Lightbulb className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <Input placeholder="e.g., 'Fashion Designer' or 'Graphic Design'" {...field} className="pl-10" />
+                            <Input placeholder="e.g., 'Software Engineer' or 'Data Science'" {...field} className="pl-10" />
                             </div>
                         </FormControl>
                         <FormMessage />
@@ -705,7 +715,7 @@ export default function MainPage() {
                     />
                     </div>
                     <Button type="submit" className="w-full !mt-8" size="lg" disabled={loading}>
-                    Explore Career
+                    Generate My Roadmap
                     </Button>
                 </form>
                 </Form>
