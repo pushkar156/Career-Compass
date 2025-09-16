@@ -211,7 +211,7 @@ export default function MainPage() {
                             <CardDescription>{data.payScale.summary}</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <ChartContainer config={chartConfig} className="h-64 w-full">
+                            <ChartContainer config={chartConfig} className="h-72 w-full">
                                 <RechartsBarChart 
                                     data={payScaleData}
                                     layout="vertical"
@@ -738,5 +738,7 @@ export default function MainPage() {
     </>
   );
 }
+
+    
 
     
