@@ -96,18 +96,19 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
   const currentSchema = steps[currentStep].schema;
   const methods = useForm({
     resolver: zodResolver(currentSchema),
-    defaultValues: {
-        ...steps[currentStep].defaultValues,
-        ...(formData as any)[`step${currentStep + 1}`],
-    },
+    // Use defaultValues from the current step and ensure they are not undefined
+    defaultValues: steps[currentStep].defaultValues,
   });
   
   const watchLearningStyles = methods.watch('learningStyles');
 
   useEffect(() => {
+    // When the step changes, reset the form with the correct default values
+    const stepKey = `step${currentStep + 1}` as keyof FormValues;
+    const existingDataForStep = formData[stepKey] || {};
     methods.reset({
       ...steps[currentStep].defaultValues,
-      ...(formData as any)[`step${currentStep + 1}`],
+      ...existingDataForStep,
     });
   }, [currentStep, methods, formData]);
 
@@ -137,6 +138,9 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
 
   const handleBack = () => {
     if (currentStep > 0) {
+      // Save current step data before going back
+      const stepData = { [`step${currentStep + 1}`]: methods.getValues() };
+      setFormData({ ...formData, ...stepData });
       setCurrentStep(currentStep - 1);
     }
   };
