@@ -5,6 +5,7 @@ import { useState, useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { motion } from 'framer-motion';
 import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building, MapPin, BarChart, PieChart, Moon, Sun, Check, BookCopy } from 'lucide-react';
 import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { useTheme } from "next-themes"
@@ -139,12 +140,18 @@ export default function MainPage() {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {data.specificRoles.map(role => (
-                          <Card key={role} className="hover:shadow-lg hover:border-primary/50 group cursor-pointer" onClick={() => onSelectRole(role)}>
+                        <motion.div
+                          key={role}
+                          whileHover={{ scale: 1.03, y: -5 }}
+                          transition={{ type: 'spring', stiffness: 300 }}
+                        >
+                          <Card className="hover:shadow-lg hover:border-primary/50 group cursor-pointer h-full" onClick={() => onSelectRole(role)}>
                               <CardContent className="p-6 flex items-center justify-between">
                                   <h3 className="font-semibold text-base">{role}</h3>
                                   <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
                               </CardContent>
                           </Card>
+                        </motion.div>
                       ))}
                   </div>
               </main>
@@ -338,36 +345,40 @@ export default function MainPage() {
             <p className="mt-4 text-lg text-muted-foreground">What would you like to do next?</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
-            <Card className="text-center p-8">
-                <CardHeader>
-                    <Route className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <CardTitle className="font-headline text-3xl">Custom Roadmap</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground mb-6">
-                        Generate a personalized, step-by-step learning path to master this role.
-                    </p>
-                    <Button size="lg" onClick={onGenerateRoadmap}>
-                        Create My Plan
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                </CardContent>
-            </Card>
-            <Card className="text-center p-8">
-                <CardHeader>
-                    <TrendingUp className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <CardTitle className="font-headline text-3xl">Explore Opportunities</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground mb-6">
-                        Get insights into job trends, salary expectations, and market demand for this role.
-                    </p>
-                    <Button size="lg" onClick={onExploreOpportunities}>
-                        Analyze Career
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                </CardContent>
-            </Card>
+            <motion.div whileHover={{ scale: 1.05, y: -5 }} transition={{ type: 'spring', stiffness: 300 }}>
+                <Card className="text-center p-8 h-full flex flex-col">
+                    <CardHeader>
+                        <Route className="h-12 w-12 text-primary mx-auto mb-4" />
+                        <CardTitle className="font-headline text-3xl">Custom Roadmap</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow flex flex-col justify-between">
+                        <p className="text-muted-foreground mb-6">
+                            Generate a personalized, step-by-step learning path to master this role.
+                        </p>
+                        <Button size="lg" onClick={onGenerateRoadmap}>
+                            Create My Plan
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+                    </CardContent>
+                </Card>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05, y: -5 }} transition={{ type: 'spring', stiffness: 300 }}>
+                <Card className="text-center p-8 h-full flex flex-col">
+                    <CardHeader>
+                        <TrendingUp className="h-12 w-12 text-primary mx-auto mb-4" />
+                        <CardTitle className="font-headline text-3xl">Explore Opportunities</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow flex flex-col justify-between">
+                        <p className="text-muted-foreground mb-6">
+                            Get insights into job trends, salary expectations, and market demand for this role.
+                        </p>
+                        <Button size="lg" onClick={onExploreOpportunities}>
+                            Analyze Career
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+                    </CardContent>
+                </Card>
+            </motion.div>
         </div>
     </div>
   );
@@ -477,21 +488,15 @@ export default function MainPage() {
   };
   
   const handleBackToExplore = () => {
-      setFinalResult(null);
       setSelectedRole(null);
-      setExplorationResult(null); // This will trigger a refetch if needed, or just go back.
-      if (!userInput) { 
-          setUserPath(null);
-      } else {
-         // Re-run the exploration to show the previous results
-         onSubmit(userInput);
+      setOpportunitiesResult(null);
+      if (userInput) {
+          onSubmit(userInput);
       }
   }
 
   const handleBackToRoleSelection = () => {
       setOpportunitiesResult(null); // Clear opportunities result
-      setExplorationResult(null); // Clear exploration to show role selection
-      setSelectedRole(selectedRole); // Keep the selected role
   }
 
   const handleQuestionnaireSubmit = (data: any) => {
@@ -575,45 +580,76 @@ export default function MainPage() {
     )
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+      },
+    },
+  };
+
   const PathSelection = () => (
-    <div className="text-center max-w-4xl mx-auto">
-        <h1 className="text-5xl font-headline font-bold">Welcome, Explorer!</h1>
-        <p className="mt-4 text-lg text-muted-foreground">
+    <motion.div 
+        className="text-center max-w-4xl mx-auto"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+    >
+        <motion.h1 variants={itemVariants} className="text-5xl font-headline font-bold">Welcome, Explorer!</motion.h1>
+        <motion.p variants={itemVariants} className="mt-4 text-lg text-muted-foreground">
             How would you like to start your journey today?
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
-            <Card className="text-center p-8">
-                <CardHeader>
-                    <Search className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <CardTitle className="font-headline text-3xl">Explore Career Options</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground mb-6">
-                        Not sure where to start? Discover your passions and find career paths that match your interests.
-                    </p>
-                    <Button size="lg" onClick={() => setUserPath('explore')}>
-                        Guide Me
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                </CardContent>
-            </Card>
-            <Card className="text-center p-8">
-                <CardHeader>
-                    <Route className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <CardTitle className="font-headline text-3xl">I Know My Path</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground mb-6">
-                        Already have a dream job in mind? Get a detailed, step-by-step roadmap to make it a reality.
-                    </p>
-                    <Button size="lg" onClick={() => setUserPath('direct')}>
-                        Show Me The Way
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                </CardContent>
-            </Card>
-        </div>
-    </div>
+        </motion.p>
+        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+            <motion.div whileHover={{ scale: 1.05, y: -5 }} transition={{ type: 'spring', stiffness: 300 }}>
+                <Card className="text-center p-8 h-full flex flex-col">
+                    <CardHeader>
+                        <Search className="h-12 w-12 text-primary mx-auto mb-4" />
+                        <CardTitle className="font-headline text-3xl">Explore Career Options</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow flex flex-col justify-between">
+                        <p className="text-muted-foreground mb-6">
+                            Not sure where to start? Discover your passions and find career paths that match your interests.
+                        </p>
+                        <Button size="lg" onClick={() => setUserPath('explore')}>
+                            Guide Me
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+                    </CardContent>
+                </Card>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05, y: -5 }} transition={{ type: 'spring', stiffness: 300 }}>
+                <Card className="text-center p-8 h-full flex flex-col">
+                    <CardHeader>
+                        <Route className="h-12 w-12 text-primary mx-auto mb-4" />
+                        <CardTitle className="font-headline text-3xl">I Know My Path</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow flex flex-col justify-between">
+                        <p className="text-muted-foreground mb-6">
+                            Already have a dream job in mind? Get a detailed, step-by-step roadmap to make it a reality.
+                        </p>
+                        <Button size="lg" onClick={() => setUserPath('direct')}>
+                            Show Me The Way
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+                    </CardContent>
+                </Card>
+            </motion.div>
+        </motion.div>
+    </motion.div>
   );
 
   const InputForm = () => (
@@ -738,7 +774,5 @@ export default function MainPage() {
     </>
   );
 }
-
-    
 
     
