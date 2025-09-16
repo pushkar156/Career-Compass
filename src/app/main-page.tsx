@@ -763,7 +763,7 @@ export default function MainPage() {
         
         {!userPath && <PathSelection />}
         {userPath === 'direct' && <InputForm />}
-        {userPath === 'explore' && <InputForm />}
+        {userPath === 'explore' && <ExplorationPath />}
     </div>
 
     <InteractiveQuestionnaire 
