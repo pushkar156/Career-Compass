@@ -117,11 +117,12 @@ export default function Header() {
                 <span className="font-bold font-headline text-xl">Career Compass</span>
             </Link>
             
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+                <Link href="/" className="text-foreground/60 transition-colors hover:text-foreground/80">Home</Link>
+                <Link href="/about" className="text-foreground/60 transition-colors hover:text-foreground/80">About Us</Link>
+            </nav>
+            
             <div className="flex items-center space-x-2">
-                <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-                    <Link href="/" className="text-foreground/60 transition-colors hover:text-foreground/80">Home</Link>
-                    <Link href="/about" className="text-foreground/60 transition-colors hover:text-foreground/80">About Us</Link>
-                </nav>
                 <ThemeToggle />
                 <UserProfile />
             </div>

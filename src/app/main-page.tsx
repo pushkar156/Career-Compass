@@ -6,9 +6,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building, MapPin, BarChart, PieChart, Moon, Sun, Check, BookCopy } from 'lucide-react';
+import { Compass, Briefcase, Sparkles, Lightbulb, Loader2, User, Handshake, Search, Route, ListChecks, CheckCircle, ArrowRight, ArrowLeft, GraduationCap, TrendingUp, DollarSign, Globe, Building, MapPin, BarChart, PieChart, Moon, Sun, Check, BookCopy, Info } from 'lucide-react';
 import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { useTheme } from "next-themes"
+import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -741,15 +742,34 @@ export default function MainPage() {
       </div>
   );
 
+  const AboutUsSection = () => (
+    <section className="py-12 md:py-20 border-t">
+      <div className="container mx-auto text-center max-w-4xl">
+        <h2 className="text-3xl font-headline font-bold mb-4">What is Career Compass?</h2>
+        <p className="text-lg text-muted-foreground mb-8">
+          In a world of ever-evolving industries, finding the right career can be overwhelming. Career Compass is an AI-powered guide designed to demystify this process, providing clear, personalized, and actionable guidance to help you confidently pursue your dreams.
+        </p>
+        <Button asChild size="lg">
+          <Link href="/about">
+            Learn More About Us
+            <Info className="ml-2 h-5 w-5" />
+          </Link>
+        </Button>
+      </div>
+    </section>
+  );
+
 
   return (
     <>
     <div className="min-h-screen flex items-center justify-center p-4">
-        
-        {!userPath && <PathSelection />}
-        {userPath === 'direct' && <InputForm form={form} onSubmit={onSubmit} loading={loading} userPath={userPath} setUserPath={setUserPath} />}
-        {userPath === 'explore' && <ExplorationPath />}
+        {!userPath && !explorationResult && !finalResult && <PathSelection />}
+        {(userPath === 'direct' || userPath === 'explore') && !explorationResult && !finalResult && (
+             userPath === 'direct' ? <InputForm form={form} onSubmit={onSubmit} loading={loading} userPath={userPath} setUserPath={setUserPath} /> : <ExplorationPath />
+        )}
     </div>
+
+    {!userPath && !explorationResult && !finalResult && <AboutUsSection />}
 
     <InteractiveQuestionnaire 
         isOpen={isQuestionnaireOpen} 
@@ -759,5 +779,3 @@ export default function MainPage() {
     </>
   );
 }
-
-    
