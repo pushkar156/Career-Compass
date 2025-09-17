@@ -428,7 +428,7 @@ export default function MainPage() {
 
   const RoleSelectionScreen = ({ role, onGenerateRoadmap, onExploreOpportunities, onBack }: { role: string; onGenerateRoadmap: () => void; onExploreOpportunities: () => void; onBack: () => void; }) => (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <Button variant="ghost" onClick={onBack} className="absolute top-6 left-6"><ArrowLeft className="mr-2 h-4 w-4"/>Back to exploration</Button>
+        <Button variant="ghost" onClick={onBack} className="absolute top-24 left-6"><ArrowLeft className="mr-2 h-4 w-4"/>Back to exploration</Button>
         <div className="text-center mb-10">
             <h1 className="text-5xl font-headline font-bold">You've selected: {role}</h1>
             <p className="mt-4 text-lg text-muted-foreground">What would you like to do next?</p>
@@ -643,32 +643,6 @@ export default function MainPage() {
             />;
   }
   
-  const ThemeToggle = () => {
-    const { setTheme } = useTheme()
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 dark:rotate-0 dark:scale-100" />
-                    <span className="sr-only">Toggle theme</span>
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setTheme("light")}>
-                    Light
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>
-                    Dark
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("system")}>
-                    System
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    )
-  }
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -771,9 +745,6 @@ export default function MainPage() {
   return (
     <>
     <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="absolute top-4 right-4">
-            <ThemeToggle />
-        </div>
         
         {!userPath && <PathSelection />}
         {userPath === 'direct' && <InputForm form={form} onSubmit={onSubmit} loading={loading} userPath={userPath} setUserPath={setUserPath} />}
