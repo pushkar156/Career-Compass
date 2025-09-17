@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { useTheme } from "next-themes"
-import { Moon, Sun, User as UserIcon, Compass } from 'lucide-react';
+import { Moon, Sun, User as UserIcon, Compass, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/use-auth';
@@ -15,6 +15,8 @@ import {
 } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import React from 'react';
 
 const auth = getAuth(app);
 
@@ -109,20 +111,46 @@ const UserProfile = () => {
 
 
 export default function Header() {
+  const [isOpen, setIsOpen] = React.useState(false);
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
-        <div className="container flex h-16 items-center justify-center space-x-4">
-            <Link href="/" className="flex items-center space-x-2">
-                <Compass className="h-6 w-6 text-primary" />
-                <span className="font-bold font-headline text-xl">Career Compass</span>
-            </Link>
+        <div className="container flex h-16 items-center justify-center">
+            <div className="flex items-center space-x-8">
+                <Link href="/" className="flex items-center space-x-2">
+                    <Compass className="h-6 w-6 text-primary" />
+                    <span className="font-bold font-headline text-xl">Career Compass</span>
+                </Link>
+                
+                <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+                    <Link href="/" className="text-foreground/60 transition-colors hover:text-foreground/80">Home</Link>
+                    <Link href="/about" className="text-foreground/60 transition-colors hover:text-foreground/80">About Us</Link>
+                </nav>
+            </div>
             
-            <nav className="flex items-center space-x-6 text-sm font-medium">
-                <Link href="/" className="text-foreground/60 transition-colors hover:text-foreground/80">Home</Link>
-                <Link href="/about" className="text-foreground/60 transition-colors hover:text-foreground/80">About Us</Link>
-            </nav>
+            <div className="ml-auto flex items-center md:hidden">
+              <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">Toggle Menu</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left">
+                  <div className="py-6">
+                    <Link href="/" className="flex items-center space-x-2 mb-6" onClick={() => setIsOpen(false)}>
+                      <Compass className="h-6 w-6 text-primary" />
+                      <span className="font-bold font-headline text-xl">Career Compass</span>
+                    </Link>
+                    <nav className="flex flex-col space-y-4">
+                      <Link href="/" className="text-lg font-medium" onClick={() => setIsOpen(false)}>Home</Link>
+                      <Link href="/about" className="text-lg font-medium" onClick={() => setIsOpen(false)}>About Us</Link>
+                    </nav>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="hidden md:flex items-center space-x-2 ml-8">
                 <ThemeToggle />
                 <UserProfile />
             </div>
