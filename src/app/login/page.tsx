@@ -49,11 +49,13 @@ export default function LoginPage() {
       await signInWithGoogle();
       router.push('/');
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Sign In Failed',
-        description: error.message,
-      });
+      if (error.code !== 'auth/popup-closed-by-user') {
+        toast({
+            variant: 'destructive',
+            title: 'Sign In Failed',
+            description: error.message,
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -89,7 +91,7 @@ export default function LoginPage() {
             : 'An unexpected error occurred. Please try again.',
       });
     } finally {
-      setLoading(palse);
+      setLoading(false);
     }
   };
   
@@ -252,3 +254,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    
