@@ -1,14 +1,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Briefcase, Compass, Lightbulb, Users } from 'lucide-react';
+import { Briefcase, Compass, Lightbulb, Users, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function AboutPage() {
   const teamMembers = [
-    { name: 'Mitali Agarwal', role: 'Senior Developer', seed: 'mitali', fallback: 'MA', hint: 'woman portrait' },
-    { name: 'Pushkar Gangurde', role: 'Senior Developer', seed: 'pushkar', fallback: 'PG', hint: 'man portrait' },
-    { name: 'Purvesh Gandhi', role: 'Junior Developer', seed: 'purvesh', fallback: 'PG', hint: 'man smiling' },
-    { name: 'Atharva Rathi', role: 'Junior Developer', seed: 'atharva', fallback: 'AR', hint: 'man glasses' },
+    { name: 'Mitali Agarwal', role: 'Senior Developer' },
+    { name: 'Pushkar Gangurde', role: 'Senior Developer' },
+    { name: 'Purvesh Gandhi', role: 'Junior Developer' },
+    { name: 'Atharva Rathi', role: 'Junior Developer' },
   ];
 
   return (
@@ -86,9 +86,8 @@ export default function AboutPage() {
               {teamMembers.map((member) => (
                 <Card key={member.name} className="text-center">
                   <CardHeader>
-                    <Avatar className="w-24 h-24 mx-auto mb-4 border-2 border-primary/10">
-                      <AvatarImage src={`https://picsum.photos/seed/${member.seed}/200`} data-ai-hint={member.hint} />
-                      <AvatarFallback>{member.fallback}</AvatarFallback>
+                    <Avatar className="w-24 h-24 mx-auto mb-4 border-2 border-primary/10 flex items-center justify-center">
+                      <User className="h-12 w-12 text-primary/80" />
                     </Avatar>
                     <CardTitle className="font-headline text-xl">{member.name}</CardTitle>
                     <CardDescription>{member.role}</CardDescription>
