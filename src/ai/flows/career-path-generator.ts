@@ -5,7 +5,7 @@
  * @fileOverview Generates a personalized learning roadmap for a specified career or field of study.
  *
  * - careerPathGenerator - A function that generates the career path.
- * - CareerPathInput - The input type for the careerPathGenerator function.
+ * - CareerPathInput - The input type for the careerPathgenerator function.
  * - CareerPathOutput - The return type for the careerPathGenerator function.
  */
 
