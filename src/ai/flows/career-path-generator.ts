@@ -13,6 +13,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import {findYoutubeVideosTool} from '@/services/youtube';
+import {googleSearchTool} from '@/services/google';
 
 const CareerPathInputSchema = z.object({
   career: z.string().describe('The career or field of study the user is interested in.'),
@@ -57,7 +58,7 @@ const careerPathPrompt = ai.definePrompt({
   name: 'careerPathPrompt',
   input: {schema: CareerPathInputSchema},
   output: {schema: CareerPathOutputSchema},
-  tools: [findYoutubeVideosTool],
+  tools: [findYoutubeVideosTool, googleSearchTool],
   prompt: `You are an expert AI career counselor and content curator. Your goal is to provide a comprehensive, high-quality, and actionable guide for a user aspiring to enter the field of: {{{career}}}.
 
 Consider the user's background:
@@ -79,9 +80,10 @@ Your response must be structured and detailed, following these strict guidelines
     *   This should outline the concepts and skills to master at each level.
 
 3.  **Resources (resources):**
-    *   Provide a curated list of the **best available and most popular resources**. Quality and popularity are more important than quantity.
-    *   **For websites and articles:** Prioritize authoritative sources like MDN Web Docs, GeeksforGeeks, W3Schools, official documentation, and top-tier blogs. When providing the title, include the domain name in parentheses, e.g., 'Official React Docs (react.dev)'.
-    *   **For online courses:** Include highly-rated courses from major platforms like Coursera and Udemy. Ensure the links are direct and valid.
+    *   Provide a curated list of the **best available and most popular resources**. Quality, popularity, and accuracy are paramount.
+    *   **For websites and articles:** Use the \`googleSearchTool\` to find authoritative sources. Prioritize official documentation (e.g., 'React Docs site:react.dev'), well-regarded educational sites ('freeCodeCamp', 'MDN Web Docs'), and top-tier blogs. Formulate queries like "best free course for learning {{{career}}}" or "free book for {{{career}}}".
+    *   **For online courses:** Use the \`googleSearchTool\` to find highly-rated courses from major platforms. Formulate queries like "top Coursera course for {{{career}}}" or "best Udemy course for {{{career}}}". Ensure the links are direct and valid.
+    *   **For books:** Use the \`googleSearchTool\` to find recommended books. Formulate queries like "best book for learning {{{career}}}".
     *   **For YouTube videos:** For each major learning topic identified in the knowledge areas, you **MUST** use the \`findYoutubeVideosTool\` to find the most relevant, popular, and embeddable videos.
         *   For each call to the tool, generate search queries that will find the most helpful, highly-regarded, and popular videos.
         *   The tool will return valid, publicly-accessible videos with their IDs. You must include these in your response. Do not hallucinate or guess video details.
