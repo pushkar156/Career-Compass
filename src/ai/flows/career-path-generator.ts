@@ -85,7 +85,7 @@ Your response must be structured and detailed, following these strict guidelines
     *   **For online courses:** Use the \`googleSearchTool\` to find highly-rated courses from major platforms. Formulate queries like "top Coursera course for {{{career}}}" or "best Udemy course for {{{career}}}". Ensure the links are direct and valid.
     *   **For books:** Use the \`googleSearchTool\` to find recommended books. Formulate queries like "best book for learning {{{career}}}".
     *   **For YouTube videos:** For each major learning topic identified in the knowledge areas, you **MUST** use the \`findYoutubeVideosTool\` to find the most relevant, popular, and embeddable videos.
-        *   For each call to the tool, generate search queries that will find the most helpful, highly-regarded, and popular videos.
+        *   For each call to the tool, generate search queries that will find the most helpful, highly-regarded, and popular videos. **You MUST request a 'limit' of at least 3 videos for each topic.**
         *   The tool will return valid, publicly-accessible videos with their IDs. You must include these in your response. Do not hallucinate or guess video details.
 
 4.  **Tools (tools):**
