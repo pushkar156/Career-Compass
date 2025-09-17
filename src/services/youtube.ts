@@ -1,3 +1,4 @@
+
 // src/services/youtube.ts
 'use server';
 
@@ -13,7 +14,7 @@ import { z } from 'genkit';
 const YoutubeSearchInputSchema = z.object({
     query: z.string().describe('The search query for YouTube.'),
     lang: z.enum(['en', 'hi']).default('en').describe('The language to search for.'),
-    limit: z.number().default(1).describe('The maximum number of results to return.'),
+    limit: z.number().default(3).describe('The maximum number of results to return.'),
 });
 
 const VideoResourceSchema = z.object({
@@ -67,7 +68,7 @@ export const findYoutubeVideosTool = ai.defineTool(
                 url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
                 type: 'video' as const,
                 videoId: item.id.videoId,
-            }));
+            })).filter((video: any) => video.videoId);
 
         } catch (error) {
             console.error('Failed to fetch from YouTube API:', error);
