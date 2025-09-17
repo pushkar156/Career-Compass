@@ -15,6 +15,7 @@ import {
 } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 
 const auth = getAuth(app);
@@ -113,15 +114,19 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
         <div className="container flex h-16 items-center">
-            <Link href="/" className="mr-6 flex items-center space-x-2">
-                <Compass className="h-6 w-6 text-primary" />
-                <span className="font-bold font-headline text-xl">Career Compass</span>
-            </Link>
-            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-                <Link href="/" className="text-foreground/60 transition-colors hover:text-foreground/80">Home</Link>
-                <Link href="/about" className="text-foreground/60 transition-colors hover:text-foreground/80">About Us</Link>
-            </nav>
-            <div className="flex flex-1 items-center justify-end space-x-2">
+            <div className="flex items-center space-x-2">
+              <SidebarTrigger />
+              <Link href="/" className="flex items-center space-x-2">
+                  <Compass className="h-6 w-6 text-primary" />
+                  <span className="font-bold font-headline text-xl">Career Compass</span>
+              </Link>
+            </div>
+            
+            <div className="flex flex-1 items-center justify-end space-x-4">
+                <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+                    <Link href="/" className="text-foreground/60 transition-colors hover:text-foreground/80">Home</Link>
+                    <Link href="/about" className="text-foreground/60 transition-colors hover:text-foreground/80">About Us</Link>
+                </nav>
                 <ThemeToggle />
                 <UserProfile />
             </div>

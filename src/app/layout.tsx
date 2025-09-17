@@ -6,6 +6,9 @@ import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/hooks/use-auth';
 import { ThemeProvider } from '@/components/theme-provider';
 import Header from '@/components/header';
+import { Sidebar, SidebarProvider, SidebarTrigger, SidebarContent, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import Link from 'next/link';
+import { Home, Info } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Career Compass',
@@ -33,8 +36,38 @@ export default function RootLayout({
             disableTransitionOnChange
         >
           <AuthProvider>
-            <Header />
-            {children}
+            <SidebarProvider>
+              <div className="flex flex-col min-h-screen">
+                <Header />
+                <div className="flex flex-1">
+                  <Sidebar>
+                    <SidebarContent>
+                      <SidebarMenu>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton asChild>
+                            <Link href="/">
+                              <Home />
+                              Home
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
+                           <SidebarMenuButton asChild>
+                            <Link href="/about">
+                              <Info />
+                              About Us
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      </SidebarMenu>
+                    </SidebarContent>
+                  </Sidebar>
+                  <SidebarInset>
+                    {children}
+                  </SidebarInset>
+                </div>
+              </div>
+            </SidebarProvider>
           </AuthProvider>
           <Toaster />
         </ThemeProvider>
