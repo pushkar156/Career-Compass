@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function AboutPage() {
   const teamMembers = [
-    { name: 'Mitali Agarwal', role: 'Senior Developer' },
+    { name: 'Mitali Agrawal', role: 'Senior Developer' },
     { name: 'Pushkar Gangurde', role: 'Senior Developer' },
     { name: 'Purvesh Gandhi', role: 'Junior Developer' },
     { name: 'Atharva Rathi', role: 'Junior Developer' },
@@ -17,7 +17,7 @@ export default function AboutPage() {
         <header className="text-center mb-12">
           <h1 className="text-5xl font-headline font-bold text-primary">About Career Compass</h1>
           <p className="text-xl text-muted-foreground mt-4">
-            Your AI-powered guide to navigating the complexities of modern career paths.
+            Your trusted guide to navigating the complexities of modern career paths.
           </p>
         </header>
 
