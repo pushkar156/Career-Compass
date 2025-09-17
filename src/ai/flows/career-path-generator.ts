@@ -94,7 +94,7 @@ Your response must be structured and detailed, following these strict guidelines
     *   List the most essential, industry-standard software and tools for this career.
     *   **Prioritize free and open-source tools where possible.** If a paid tool is the undisputed industry standard, include it, but ensure free alternatives are also listed if they exist.
     *   **Order the list from the most recommended tool to the least recommended.**
-    *   For each tool, you must provide its name, a brief one-sentence description, and its cost model ('Free', 'Paid', or 'Freemium').
+    *   For each tool, you must provide its name, a brief one-sentence description, and its cost model ('Free', 'Paid', 'Freemium').
 
 5.  **Personalized Advice (advice):**
     *   Based on the user's current role (especially if they are a student), provide a list of specific, actionable advice points as bullet points.
