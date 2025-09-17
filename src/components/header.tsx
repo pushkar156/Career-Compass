@@ -15,7 +15,7 @@ import {
 } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import React from 'react';
 
 const auth = getAuth(app);
@@ -136,6 +136,9 @@ export default function Header() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left">
+                  <SheetHeader className="sr-only">
+                    <SheetTitle>Mobile Menu</SheetTitle>
+                  </SheetHeader>
                   <div className="py-6">
                     <Link href="/" className="flex items-center space-x-2 mb-6" onClick={() => setIsOpen(false)}>
                       <Compass className="h-6 w-6 text-primary" />
