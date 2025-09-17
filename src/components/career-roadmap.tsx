@@ -28,6 +28,7 @@ import {
   DollarSign,
   Lightbulb,
   CheckCircle,
+  TrendingUp,
 } from 'lucide-react';
 
 interface CareerRoadmapProps {
@@ -38,12 +39,13 @@ interface CareerRoadmapProps {
     interests?: string;
   };
   onReset: () => void;
+  onViewOpportunities: () => void;
 }
 
 type Resource = CareerPathOutput['resources'][0];
 type Tool = CareerPathOutput['tools'][0];
 
-export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) {
+export function CareerRoadmap({ data, userInput, onReset, onViewOpportunities }: CareerRoadmapProps) {
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   
   const allKnowledgeAreas = useMemo(() => {
@@ -157,6 +159,10 @@ export function CareerRoadmap({ data, userInput, onReset }: CareerRoadmapProps) 
                       </div>
                     </div>
                   )}
+                   <Button onClick={onViewOpportunities} variant="secondary" className="w-full mt-4">
+                        <TrendingUp className="mr-2 h-4 w-4" />
+                        View Market Insights
+                    </Button>
                 </CardContent>
               </Card>
             </div>

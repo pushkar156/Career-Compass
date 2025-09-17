@@ -249,7 +249,7 @@ export default function MainPage() {
       </div>
   );
 
-  const CareerOpportunitiesResult = ({ data, role, onBack }: { data: CareerOpportunitiesOutput, role: string, onBack: () => void }) => {
+  const CareerOpportunitiesResult = ({ data, role, onBack, onGenerateRoadmap }: { data: CareerOpportunitiesOutput, role: string, onBack: () => void, onGenerateRoadmap: () => void }) => {
     const payScaleData = useMemo(() => [
         { level: 'Entry-Level', range: data.payScale.ranges.entry, fill: "hsl(var(--chart-1))" },
         { level: 'Mid-Level', range: data.payScale.ranges.mid, fill: "hsl(var(--chart-2))" },
@@ -279,10 +279,16 @@ export default function MainPage() {
     return (
         <div className="min-h-screen p-4 sm:p-6 md:p-10">
             <div className="max-w-6xl mx-auto">
-                <header className="mb-8">
-                    <Button variant="ghost" onClick={onBack} className="mb-4"><ArrowLeft className="mr-2 h-4 w-4" />Back to Role Selection</Button>
-                    <h1 className="text-4xl font-headline font-bold">Career Opportunities: {role}</h1>
-                    <p className="text-muted-foreground mt-2">An analysis of the job market and future trends for this role.</p>
+                 <header className="mb-8 flex items-center justify-between">
+                    <div>
+                        <Button variant="ghost" onClick={onBack} className="mb-2"><ArrowLeft className="mr-2 h-4 w-4" />Back to Role Selection</Button>
+                        <h1 className="text-4xl font-headline font-bold">Career Opportunities: {role}</h1>
+                        <p className="text-muted-foreground mt-2">An analysis of the job market and future trends for this role.</p>
+                    </div>
+                    <Button onClick={onGenerateRoadmap}>
+                        <Route className="mr-2 h-4 w-4"/>
+                        View Custom Roadmap
+                    </Button>
                 </header>
 
                 <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -511,6 +517,7 @@ export default function MainPage() {
     setLoading(true);
     setLoadingStage('generating');
     setFinalResult(null);
+    setOpportunitiesResult(null);
     
     const updatedInput = { ...finalUserInput, desiredCareer: specificRole };
     setUserInput(updatedInput);
@@ -589,6 +596,13 @@ export default function MainPage() {
       setOpportunitiesResult(null); // Clear opportunities result
   }
 
+  const handleViewOpportunities = () => {
+    if (selectedRole) {
+      setFinalResult(null); // Hide roadmap
+      onExploreOpportunities(selectedRole); // Fetch and show opportunities
+    }
+  };
+
   const handleQuestionnaireSubmit = (data: any) => {
     const learningStyles = data.step4.learningStyles?.includes('other') 
       ? [...data.step4.learningStyles.filter((s: string) => s !== 'other'), data.step4.otherLearningStyle]
@@ -624,11 +638,11 @@ export default function MainPage() {
   }
 
   if (finalResult && userInput) {
-    return <CareerRoadmap data={finalResult} userInput={userInput} onReset={handleReset} />;
+    return <CareerRoadmap data={finalResult} userInput={userInput} onReset={handleReset} onViewOpportunities={handleViewOpportunities} />;
   }
   
   if (opportunitiesResult && selectedRole) {
-      return <CareerOpportunitiesResult data={opportunitiesResult} role={selectedRole} onBack={handleBackToRoleSelection} />;
+      return <CareerOpportunitiesResult data={opportunitiesResult} role={selectedRole} onBack={handleBackToRoleSelection} onGenerateRoadmap={() => onGenerateRoadmap(selectedRole, userInput)} />;
   }
 
   if (selectedRole) {
