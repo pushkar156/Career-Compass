@@ -1,11 +1,19 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Briefcase, Compass, Lightbulb, Users } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function AboutPage() {
+  const teamMembers = [
+    { name: 'Mitali Agarwal', role: 'Senior Developer', seed: 'mitali', fallback: 'MA', hint: 'woman portrait' },
+    { name: 'Pushkar Gangurde', role: 'Senior Developer', seed: 'pushkar', fallback: 'PG', hint: 'man portrait' },
+    { name: 'Purvesh Gandhi', role: 'Junior Developer', seed: 'purvesh', fallback: 'PG', hint: 'man smiling' },
+    { name: 'Atharva Rathi', role: 'Junior Developer', seed: 'atharva', fallback: 'AR', hint: 'man glasses' },
+  ];
+
   return (
     <div className="min-h-screen p-4 sm:p-6 md:p-10">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <header className="text-center mb-12">
           <h1 className="text-5xl font-headline font-bold text-primary">About Career Compass</h1>
           <p className="text-xl text-muted-foreground mt-4">
@@ -69,6 +77,24 @@ export default function AboutPage() {
                   </p>
                 </CardContent>
               </Card>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-4xl font-headline font-bold text-center mb-8">Meet Our Team</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {teamMembers.map((member) => (
+                <Card key={member.name} className="text-center">
+                  <CardHeader>
+                    <Avatar className="w-24 h-24 mx-auto mb-4 border-2 border-primary/10">
+                      <AvatarImage src={`https://picsum.photos/seed/${member.seed}/200`} data-ai-hint={member.hint} />
+                      <AvatarFallback>{member.fallback}</AvatarFallback>
+                    </Avatar>
+                    <CardTitle className="font-headline text-xl">{member.name}</CardTitle>
+                    <CardDescription>{member.role}</CardDescription>
+                  </CardHeader>
+                </Card>
+              ))}
             </div>
           </section>
 
