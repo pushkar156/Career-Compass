@@ -26,7 +26,7 @@ const GoogleSearchOutputSchema = z.array(SearchResultSchema);
 export const googleSearchTool = ai.defineTool(
     {
         name: 'googleSearchTool',
-        description: 'Performs a Google search using the Custom Search API to find relevant web pages.',
+        description: 'Performs a Google search using the Custom Search API to find relevant web pages. Use this to find courses, articles, books, and official documentation.',
         inputSchema: GoogleSearchInputSchema,
         outputSchema: GoogleSearchOutputSchema,
     },
@@ -58,7 +58,7 @@ export const googleSearchTool = ai.defineTool(
                 title: item.title || '',
                 url: item.link || '',
                 description: item.snippet || '',
-            })).filter(item => item.url);
+            })).filter(item => item.url && item.title);
 
         } catch (error) {
             console.error('Failed to fetch from Google Custom Search API:', error);

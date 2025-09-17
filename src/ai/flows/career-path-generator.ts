@@ -1,4 +1,3 @@
-
 // src/ai/flows/career-path-generator.ts
 'use server';
 
@@ -44,7 +43,7 @@ const ToolSchema = z.object({
 const CareerPathOutputSchema = z.object({
   roadmap: RoadmapSchema.describe('A personalized learning roadmap segmented by skill level.'),
   knowledgeAreas: RoadmapSchema.describe('List of required knowledge areas, segmented by skill level.'),
-  resources: z.array(ResourceSchema).describe('List of relevant, high-quality resources.'),
+  resources: z.array(ResourceSchema).describe('A curated list of 2-3 high-quality, relevant resources for each category (video, course, etc.).'),
   tools: z.array(ToolSchema).describe('List of the essential tools for the field, ordered from most to least recommended.'),
   advice: z.array(z.string()).describe('A list of personalized advice points for transitioning from the current role to the desired career, especially for students.'),
 });
@@ -80,13 +79,16 @@ Your response must be structured and detailed, following these strict guidelines
     *   This should outline the concepts and skills to master at each level.
 
 3.  **Resources (resources):**
-    *   Provide a curated list of the **best available and most popular resources**. Quality, popularity, and accuracy are paramount.
-    *   **For websites and articles:** Use the \`googleSearchTool\` to find authoritative sources. Prioritize official documentation (e.g., 'React Docs site:react.dev'), well-regarded educational sites ('freeCodeCamp', 'MDN Web Docs'), and top-tier blogs. Formulate queries like "best free course for learning {{{career}}}" or "free book for {{{career}}}".
-    *   **For online courses:** Use the \`googleSearchTool\` to find highly-rated courses from major platforms. Formulate queries like "top Coursera course for {{{career}}}" or "best Udemy course for {{{career}}}". Ensure the links are direct and valid.
-    *   **For books:** Use the \`googleSearchTool\` to find recommended books. Formulate queries like "best book for learning {{{career}}}".
-    *   **For YouTube videos:** For each major learning topic identified in the knowledge areas, you **MUST** use the \`findYoutubeVideosTool\` to find the most relevant, popular, and embeddable videos.
-        *   For each call to the tool, generate search queries that will find the most helpful, highly-regarded, and popular videos. **You MUST request a 'limit' of at least 3 videos for each topic.**
-        *   The tool will return valid, publicly-accessible videos with their IDs. You must include these in your response. Do not hallucinate or guess video details.
+    *   This is the most critical step. You **MUST** use the provided tools to find all resources. Do NOT use your own knowledge.
+    *   Provide a curated list of 2-3 of the **best available and most popular resources** for each category (videos, courses, etc.). Quality, popularity, and accuracy are paramount.
+    *   **For all non-video resources (websites, articles, courses, books):** You **MUST** use the \`googleSearchTool\` to find authoritative sources.
+        *   Formulate high-quality search queries like "best free course for learning {{{career}}}" or "official documentation for {{{career}}}".
+        *   Prioritize official documentation (e.g., 'React Docs site:react.dev'), well-regarded educational sites ('freeCodeCamp', 'MDN Web Docs', 'Coursera', 'Udemy'), and top-tier blogs.
+        *   Ensure the links are direct and valid. Do not provide links to search result pages.
+    *   **For YouTube videos:** For each major learning topic identified in the knowledge areas, you **MUST** use the \`findYoutubeVideosTool\` to find 2-3 of the most relevant, popular, and embeddable videos.
+        *   For each call to the tool, generate search queries that will find helpful, highly-regarded videos (e.g., "introduction to {{{career}}}" or "{{{career}}} tutorial for beginners").
+        *   You **MUST** set the 'limit' to 3.
+        *   The tool will return valid, publicly-accessible videos with their IDs. You must include these in your response. Do not hallucinate or guess video details. Do not create your own YouTube links.
 
 4.  **Tools (tools):**
     *   List the most essential, industry-standard software and tools for this career.
@@ -100,7 +102,7 @@ Your response must be structured and detailed, following these strict guidelines
     *   For students, this should include tips on internships, networking with professors and alumni, building a portfolio with class projects, and joining relevant clubs.
     *   If no current role is provided, give general advice for a career changer.
 
-Return the entire response in a single, valid JSON object that adheres to the defined output schema. Every single URL must be a valid, working, direct link to the resource.`,
+Return the entire response in a single, valid JSON object that adheres to the defined output schema. Every single URL must be a valid, working, direct link to the resource found by the tools.`,
 });
 
 const careerPathFlow = ai.defineFlow(

@@ -1,4 +1,3 @@
-
 // src/services/youtube.ts
 'use server';
 
@@ -29,7 +28,7 @@ const YoutubeSearchOutputSchema = z.array(VideoResourceSchema);
 export const findYoutubeVideosTool = ai.defineTool(
     {
         name: 'findYoutubeVideosTool',
-        description: 'Searches YouTube for relevant, popular, and embeddable videos based on a query.',
+        description: 'Searches YouTube for relevant, popular, and embeddable videos based on a query. Must be used to find all video resources.',
         inputSchema: YoutubeSearchInputSchema,
         outputSchema: YoutubeSearchOutputSchema,
     },
@@ -68,7 +67,7 @@ export const findYoutubeVideosTool = ai.defineTool(
                 url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
                 type: 'video' as const,
                 videoId: item.id.videoId,
-            })).filter((video: any) => video.videoId);
+            })).filter((video: any) => video.videoId && video.title);
 
         } catch (error) {
             console.error('Failed to fetch from YouTube API:', error);
