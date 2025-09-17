@@ -97,6 +97,7 @@ export default function LoginPage() {
   
   const GoogleSignInButton = () => (
     <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>
+      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
         <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 23.4 172.9 61.9l-72.2 68.7C298.6 112.6 274.2 96 248 96 173.3 96 112 157.3 112 232s61.3 136 136 136c76.3 0 124.2-60.4 128.4-93.8H248v-85.3h236.1c2.3 12.7 3.9 26.4 3.9 40.9z"></path>
       </svg>
