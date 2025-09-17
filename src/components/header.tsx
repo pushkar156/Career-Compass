@@ -114,8 +114,8 @@ export default function Header() {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
-        <div className="container flex h-16 items-center justify-between">
-            <div className="flex items-center space-x-4 md:hidden">
+        <div className="container flex h-16 items-center">
+            <div className="md:hidden">
               <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -124,8 +124,8 @@ export default function Header() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left">
-                    <SheetHeader className="sr-only">
-                        <SheetTitle>Mobile Menu</SheetTitle>
+                    <SheetHeader>
+                        <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                     </SheetHeader>
                   <div className="py-6">
                     <Link href="/" className="flex items-center space-x-2 mb-6" onClick={() => setIsOpen(false)}>
@@ -142,7 +142,7 @@ export default function Header() {
               </Sheet>
             </div>
             
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center justify-center flex-1 space-x-8">
                 <Link href="/" className="flex items-center space-x-2">
                     <Compass className="h-6 w-6 text-primary" />
                     <span className="font-bold font-headline text-xl">Career Compass</span>
@@ -155,7 +155,7 @@ export default function Header() {
                 </nav>
             </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 ml-auto md:ml-0">
                 <ThemeToggle />
                 <UserProfile />
             </div>
