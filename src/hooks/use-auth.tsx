@@ -14,7 +14,7 @@ import {
     signInWithEmailAndPassword
 } from 'firebase/auth';
 import { app } from '@/lib/firebase';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
@@ -35,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -44,6 +45,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!loading && user && pathname === '/login') {
+      router.push('/');
+    }
+  }, [user, loading, pathname, router]);
 
   const signInWithGoogle = () => {
     return signInWithPopup(auth, googleProvider);
