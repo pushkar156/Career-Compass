@@ -8,17 +8,9 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  getAuth,
-  signInWithPopup,
-  GoogleAuthProvider,
-} from 'firebase/auth';
-import { app } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import React from 'react';
-
-const auth = getAuth(app);
 
 const ThemeToggle = () => {
     const { setTheme } = useTheme();
@@ -48,13 +40,12 @@ const ThemeToggle = () => {
 };
 
 const UserProfile = () => {
-    const { user, loading, signOut } = useAuth();
+    const { user, loading, signOut, signInWithGoogle } = useAuth();
     const { toast } = useToast();
 
     const handleSignIn = async () => {
-        const provider = new GoogleAuthProvider();
         try {
-            await signInWithPopup(auth, provider);
+            await signInWithGoogle();
         } catch (error: any) {
             console.error('Error signing in with Google:', error);
             toast({
@@ -95,6 +86,9 @@ const UserProfile = () => {
                             </div>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                            <Link href="/history">My History</Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => signOut()}>
                             Log out
                         </DropdownMenuItem>
@@ -114,7 +108,7 @@ export default function Header() {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
-        <div className="container flex h-16 items-center">
+        <div className="container flex h-16 items-center justify-between">
             <div className="md:hidden">
               <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger asChild>
@@ -124,38 +118,38 @@ export default function Header() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left">
-                    <SheetHeader>
-                        <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                    <SheetHeader className="p-4 border-b">
+                      <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                     </SheetHeader>
                   <div className="py-6">
-                    <Link href="/" className="flex items-center space-x-2 mb-6" onClick={() => setIsOpen(false)}>
+                    <Link href="/" className="flex items-center space-x-2 mb-6 px-4" onClick={() => setIsOpen(false)}>
                       <Compass className="h-6 w-6 text-primary" />
                       <span className="font-bold font-headline text-xl">Career Compass</span>
                     </Link>
-                    <nav className="flex flex-col space-y-4">
-                      <Link href="/" className="text-lg font-medium" onClick={() => setIsOpen(false)}>Home</Link>
-                      <Link href="/about" className="text-lg font-medium" onClick={() => setIsOpen(false)}>About Us</Link>
-                      <Link href="/history" className="text-lg font-medium" onClick={() => setIsOpen(false)}>History</Link>
+                    <nav className="flex flex-col space-y-1 px-4">
+                      <Button variant="ghost" className="justify-start text-lg" asChild onClick={() => setIsOpen(false)}><Link href="/">Home</Link></Button>
+                      <Button variant="ghost" className="justify-start text-lg" asChild onClick={() => setIsOpen(false)}><Link href="/about">About Us</Link></Button>
+                      <Button variant="ghost" className="justify-start text-lg" asChild onClick={() => setIsOpen(false)}><Link href="/history">History</Link></Button>
                     </nav>
                   </div>
                 </SheetContent>
               </Sheet>
             </div>
             
-            <div className="hidden md:flex items-center justify-center flex-1 space-x-8">
+            <div className="hidden md:flex items-center justify-center flex-1">
                 <Link href="/" className="flex items-center space-x-2">
                     <Compass className="h-6 w-6 text-primary" />
                     <span className="font-bold font-headline text-xl">Career Compass</span>
                 </Link>
                 
-                <nav className="flex items-center space-x-6 text-sm font-medium">
+                <nav className="flex items-center space-x-6 text-sm font-medium ml-6">
                     <Link href="/" className="text-foreground/60 transition-colors hover:text-foreground/80">Home</Link>
                     <Link href="/about" className="text-foreground/60 transition-colors hover:text-foreground/80">About Us</Link>
                     <Link href="/history" className="text-foreground/60 transition-colors hover:text-foreground/80">History</Link>
                 </nav>
             </div>
             
-            <div className="flex items-center space-x-2 ml-auto md:ml-0">
+            <div className="flex items-center space-x-2">
                 <ThemeToggle />
                 <UserProfile />
             </div>
