@@ -106,8 +106,16 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
     // When the step changes, reset the form with the correct default values
     const stepKey = `step${currentStep + 1}` as keyof FormValues;
     const existingDataForStep = formData[stepKey] || {};
+    const defaultValues = steps[currentStep].defaultValues;
+
+    // Ensure all default values are non-undefined
+    const safeDefaultValues: any = {};
+    for (const key in defaultValues) {
+        safeDefaultValues[key] = (defaultValues as any)[key] ?? '';
+    }
+    
     methods.reset({
-      ...steps[currentStep].defaultValues,
+      ...safeDefaultValues,
       ...existingDataForStep,
     });
   }, [currentStep, methods, formData]);
