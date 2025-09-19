@@ -47,12 +47,14 @@ const UserProfile = () => {
         try {
             await signInWithGoogle();
         } catch (error: any) {
-            console.error('Error signing in with Google:', error);
-            toast({
-                variant: 'destructive',
-                title: 'Sign In Failed',
-                description: error.message,
-            });
+            if (error.code !== 'auth/popup-closed-by-user') {
+                console.error('Error signing in with Google:', error);
+                toast({
+                    variant: 'destructive',
+                    title: 'Sign In Failed',
+                    description: error.message,
+                });
+            }
         }
     };
 
@@ -108,8 +110,8 @@ export default function Header() {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
-        <div className="container flex h-16 items-center justify-between">
-            <div className="md:hidden">
+        <div className="container flex h-16 items-center">
+            <div className="md:hidden flex-none">
               <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -136,20 +138,22 @@ export default function Header() {
               </Sheet>
             </div>
             
-            <div className="hidden md:flex items-center justify-center flex-1">
-                <Link href="/" className="flex items-center space-x-2">
-                    <Compass className="h-6 w-6 text-primary" />
-                    <span className="font-bold font-headline text-xl">Career Compass</span>
-                </Link>
-                
-                <nav className="flex items-center space-x-6 text-sm font-medium ml-6">
-                    <Link href="/" className="text-foreground/60 transition-colors hover:text-foreground/80">Home</Link>
-                    <Link href="/about" className="text-foreground/60 transition-colors hover:text-foreground/80">About Us</Link>
-                    <Link href="/history" className="text-foreground/60 transition-colors hover:text-foreground/80">History</Link>
-                </nav>
+            <div className="flex-1 flex justify-center">
+                <div className="hidden md:flex items-center">
+                    <Link href="/" className="flex items-center space-x-2">
+                        <Compass className="h-6 w-6 text-primary" />
+                        <span className="font-bold font-headline text-xl">Career Compass</span>
+                    </Link>
+                    
+                    <nav className="flex items-center space-x-6 text-sm font-medium ml-6">
+                        <Link href="/" className="text-foreground/60 transition-colors hover:text-foreground/80">Home</Link>
+                        <Link href="/about" className="text-foreground/60 transition-colors hover:text-foreground/80">About Us</Link>
+                        <Link href="/history" className="text-foreground/60 transition-colors hover:text-foreground/80">History</Link>
+                    </nav>
+                </div>
             </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex-none flex items-center space-x-2">
                 <ThemeToggle />
                 <UserProfile />
             </div>
