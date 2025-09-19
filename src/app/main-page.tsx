@@ -435,10 +435,10 @@ export default function MainPage() {
 
   const RoleSelectionScreen = ({ role, onGenerateRoadmap, onExploreOpportunities, onBack }: { role: string; onGenerateRoadmap: () => void; onExploreOpportunities: () => void; onBack: () => void; }) => (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <Button variant="ghost" onClick={onBack} className="absolute top-24 left-6"><ArrowLeft className="mr-2 h-4 w-4"/>Back to exploration</Button>
-        <div className="text-center mb-10">
-            <h1 className="text-5xl font-headline font-bold">You've selected: {role}</h1>
-            <p className="mt-4 text-lg text-muted-foreground">What would you like to do next?</p>
+        <div className="text-center">
+            <Button variant="ghost" onClick={onBack} className="mb-6"><ArrowLeft className="mr-2 h-4 w-4"/>Back to exploration</Button>
+            <h1 className="text-5xl font-headline font-bold mb-4">You've selected: {role}</h1>
+            <p className="text-lg text-muted-foreground mb-10">What would you like to do next?</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
             <motion.div whileHover={{ scale: 1.05, y: -5 }} transition={{ type: 'spring', stiffness: 300 }}>
