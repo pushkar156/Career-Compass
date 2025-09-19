@@ -52,8 +52,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user, loading, pathname, router]);
 
-  const signInWithGoogle = () => {
-    return signInWithPopup(auth, googleProvider);
+  const signInWithGoogle = async () => {
+    const result = await signInWithPopup(auth, googleProvider);
+    setUser(result.user);
+    return result;
   };
 
   const signUpWithEmail = async (email: string, password: string, name: string) => {
