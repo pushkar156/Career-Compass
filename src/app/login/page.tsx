@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -29,7 +29,7 @@ const signUpSchema = z.object({
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail, user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -42,6 +42,12 @@ export default function LoginPage() {
     resolver: zodResolver(signUpSchema),
     defaultValues: { name: '', email: '', password: '' },
   });
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/');
+    }
+  }, [user, authLoading, router]);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);

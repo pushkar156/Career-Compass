@@ -46,12 +46,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (!loading && user && pathname === '/login') {
-      router.push('/');
-    }
-  }, [user, loading, pathname, router]);
-
   const signInWithGoogle = async () => {
     const result = await signInWithPopup(auth, googleProvider);
     setUser(result.user);
@@ -62,16 +56,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(userCredential.user, { displayName: name });
     // Manually update user state to reflect display name
-    setUser(auth.currentUser);
+    const currentUser = getAuth(app).currentUser;
+    setUser(currentUser);
     return userCredential;
   };
   
-  const signInWithEmail = (email: string, password: string) => {
-    return signInWithEmailAndPassword(auth, email, password);
+  const signInWithEmail = async (email: string, password: string) => {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    setUser(result.user);
+    return result;
   }
 
   const signOut = async () => {
     await firebaseSignOut(auth);
+    setUser(null);
     router.push('/login');
   };
 
@@ -79,7 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (auth.currentUser) {
       await updateProfile(auth.currentUser, profile);
       // Manually update the user state to reflect changes immediately
-      setUser(auth.currentUser);
+      const currentUser = getAuth(app).currentUser;
+      setUser(currentUser);
     }
   };
 
