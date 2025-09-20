@@ -40,23 +40,7 @@ const ThemeToggle = () => {
 };
 
 const UserProfile = () => {
-    const { user, loading, signOut, signInWithGoogle } = useAuth();
-    const { toast } = useToast();
-
-    const handleSignIn = async () => {
-        try {
-            await signInWithGoogle();
-        } catch (error: any) {
-            if (error.code !== 'auth/popup-closed-by-user') {
-                console.error('Error signing in with Google:', error);
-                toast({
-                    variant: 'destructive',
-                    title: 'Sign In Failed',
-                    description: error.message,
-                });
-            }
-        }
-    };
+    const { user, loading, signOut } = useAuth();
 
     if (loading) {
         return <Button variant="ghost" size="icon" disabled><UserIcon className="h-5 w-5" /></Button>
@@ -96,9 +80,14 @@ const UserProfile = () => {
                         </DropdownMenuItem>
                     </>
                 ) : (
-                    <DropdownMenuItem onClick={handleSignIn}>
-                        Sign In with Google
-                    </DropdownMenuItem>
+                    <>
+                        <DropdownMenuItem asChild>
+                           <Link href="/login">Sign In</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                           <Link href="/login">Sign Up</Link>
+                        </DropdownMenuItem>
+                    </>
                 )}
             </DropdownMenuContent>
         </DropdownMenu>
