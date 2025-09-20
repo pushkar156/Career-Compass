@@ -11,7 +11,8 @@ import {
     signInWithPopup,
     GoogleAuthProvider,
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword
+    signInWithEmailAndPassword,
+    deleteUser
 } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { useRouter, usePathname } from 'next/navigation';
@@ -27,6 +28,7 @@ interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
   updateUserProfile: (profile: { displayName?: string; photoURL?: string }) => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -82,8 +84,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const deleteAccount = async () => {
+    if (auth.currentUser) {
+      await deleteUser(auth.currentUser);
+      setUser(null);
+      router.push('/');
+    } else {
+      throw new Error("No user is currently signed in.");
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signUpWithEmail, signInWithEmail, signOut, updateUserProfile }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signUpWithEmail, signInWithEmail, signOut, updateUserProfile, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

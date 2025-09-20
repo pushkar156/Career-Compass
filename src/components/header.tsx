@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { useTheme } from "next-themes"
-import { Moon, Sun, User as UserIcon, Compass, Menu, History } from 'lucide-react';
+import { Moon, Sun, User as UserIcon, Compass, Menu, History, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/use-auth';
@@ -72,6 +72,9 @@ const UserProfile = () => {
                             </div>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                            <Link href="/profile">Profile</Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                             <Link href="/history">My History</Link>
                         </DropdownMenuItem>
