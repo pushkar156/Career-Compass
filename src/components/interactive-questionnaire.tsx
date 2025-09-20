@@ -30,6 +30,7 @@ const learningStyleOptions = [
 
 const steps = [
   {
+    name: 'step1',
     icon: Handshake,
     title: 'Initiation & Rapport Building',
     description: "Let's start with the basics. What's on your mind?",
@@ -39,6 +40,7 @@ const steps = [
     defaultValues: { name: '' },
   },
   {
+    name: 'step2',
     icon: Search,
     title: 'In-Depth Exploration',
     description: "Let's dig a little deeper into your background and goals.",
@@ -49,6 +51,7 @@ const steps = [
     defaultValues: { careerGoal: '', currentBackground: '' },
   },
   {
+    name: 'step3',
     icon: Route,
     title: 'Decision Making',
     description: 'What are your passions and what do you enjoy doing?',
@@ -59,6 +62,7 @@ const steps = [
     defaultValues: { interests: '', skills: '' },
   },
   {
+    name: 'step4',
     icon: ListChecks,
     title: 'Action Plan Preparation',
     description: 'How do you prefer to learn? Click "Generate Roadmap" when you are ready!',
@@ -88,34 +92,33 @@ type FormValues = {
   step4: z.infer<typeof steps[3]['schema']>;
 };
 
+const initialFormData: FormValues = {
+    step1: steps[0].defaultValues,
+    step2: steps[1].defaultValues,
+    step3: steps[2].defaultValues,
+    step4: steps[3].defaultValues,
+};
+
 
 export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { isOpen: boolean; onOpenChange: (isOpen: boolean) => void; onSubmit: (data: FormValues) => void; }) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<Partial<FormValues>>({});
+  const [formData, setFormData] = useState<FormValues>(initialFormData);
 
   const currentSchema = steps[currentStep].schema;
   const methods = useForm({
     resolver: zodResolver(currentSchema),
-    // Use defaultValues from the current step and ensure they are not undefined
     defaultValues: steps[currentStep].defaultValues,
   });
   
   const watchLearningStyles = methods.watch('learningStyles');
 
   useEffect(() => {
-    // When the step changes, reset the form with the correct default values
     const stepKey = `step${currentStep + 1}` as keyof FormValues;
-    const existingDataForStep = formData[stepKey] || {};
-    const defaultValues = steps[currentStep].defaultValues;
-
-    // Ensure all default values are non-undefined
-    const safeDefaultValues: any = {};
-    for (const key in defaultValues) {
-        safeDefaultValues[key] = (defaultValues as any)[key] ?? '';
-    }
+    const defaultValuesForStep = steps[currentStep].defaultValues;
+    const existingDataForStep = formData[stepKey];
     
     methods.reset({
-      ...safeDefaultValues,
+      ...defaultValuesForStep,
       ...existingDataForStep,
     });
   }, [currentStep, methods, formData]);
@@ -126,18 +129,16 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
     if (isValid) {
       const stepData = { [`step${currentStep + 1}`]: methods.getValues() };
       const newFormData = { ...formData, ...stepData };
-      setFormData(newFormData);
+      setFormData(newFormData as FormValues);
 
       if (currentStep < steps.length - 1) {
         setCurrentStep(currentStep + 1);
       } else {
-        // This is the final step, call submit
         onSubmit(newFormData as FormValues);
         onOpenChange(false);
-        // Reset state for next time
         setTimeout(() => {
             setCurrentStep(0);
-            setFormData({});
+            setFormData(initialFormData);
             methods.reset(steps[0].defaultValues);
         }, 500);
       }
@@ -146,9 +147,8 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
 
   const handleBack = () => {
     if (currentStep > 0) {
-      // Save current step data before going back
       const stepData = { [`step${currentStep + 1}`]: methods.getValues() };
-      setFormData({ ...formData, ...stepData });
+      setFormData({ ...formData, ...stepData } as FormValues);
       setCurrentStep(currentStep - 1);
     }
   };
