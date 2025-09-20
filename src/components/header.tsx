@@ -80,14 +80,9 @@ const UserProfile = () => {
                         </DropdownMenuItem>
                     </>
                 ) : (
-                    <>
-                        <DropdownMenuItem asChild>
-                           <Link href="/login">Sign In</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                           <Link href="/login">Sign Up</Link>
-                        </DropdownMenuItem>
-                    </>
+                    <DropdownMenuItem asChild>
+                       <Link href="/login">Sign In / Sign Up</Link>
+                    </DropdownMenuItem>
                 )}
             </DropdownMenuContent>
         </DropdownMenu>
