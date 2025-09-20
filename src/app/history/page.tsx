@@ -4,32 +4,32 @@
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { History, Clock, ArrowRight, User } from 'lucide-react';
+import { History, Clock, ArrowRight, User, Search } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HistoryPage() {
   const { user, loading } = useAuth();
 
   // This is placeholder data. In the future, this would be fetched from a database.
-  const userHistory = [
-    {
-      id: '1',
-      career: 'Software Engineer',
-      date: '2024-07-28',
-      progress: 75,
-    },
-    {
-      id: '2',
-      career: 'UX Designer',
-      date: '2024-07-25',
-      progress: 40,
-    },
-    {
-      id: '3',
-      career: 'Data Scientist',
-      date: '2024-07-22',
-      progress: 90,
-    },
+  const userHistory: { id: string; career: string; date: string; progress: number }[] = [
+    // {
+    //   id: '1',
+    //   career: 'Software Engineer',
+    //   date: '2024-07-28',
+    //   progress: 75,
+    // },
+    // {
+    //   id: '2',
+    //   career: 'UX Designer',
+    //   date: '2024-07-25',
+    //   progress: 40,
+    // },
+    // {
+    //   id: '3',
+    //   career: 'Data Scientist',
+    //   date: '2024-07-22',
+    //   progress: 90,
+    // },
   ];
 
   if (loading) {
@@ -79,8 +79,11 @@ export default function HistoryPage() {
         {userHistory.length === 0 ? (
           <Card className="text-center p-8">
             <CardHeader>
-              <CardTitle>No History Found</CardTitle>
-              <CardDescription>You haven't explored any careers yet.</CardDescription>
+                <div className="mx-auto bg-primary/10 text-primary p-3 rounded-full w-fit mb-4">
+                    <Search size={32} />
+                </div>
+              <CardTitle className="font-headline text-2xl">No History Found</CardTitle>
+              <CardDescription>You haven't explored any careers yet. Let's get started!</CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild>
