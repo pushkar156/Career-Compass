@@ -595,6 +595,10 @@ export default function MainPage() {
   const handleBackToRoleSelection = () => {
       setOpportunitiesResult(null); // Clear opportunities result
   }
+  
+  const handleBackToRoleSelectionFromRoadmap = () => {
+      setFinalResult(null); // Clear roadmap result
+  }
 
   const handleViewOpportunities = () => {
     if (selectedRole) {
@@ -638,7 +642,7 @@ export default function MainPage() {
   }
 
   if (finalResult && userInput) {
-    return <CareerRoadmap data={finalResult} userInput={userInput} onReset={handleReset} onViewOpportunities={handleViewOpportunities} />;
+    return <CareerRoadmap data={finalResult} userInput={userInput} onReset={handleReset} onViewOpportunities={handleViewOpportunities} onBackToRoleSelection={handleBackToRoleSelectionFromRoadmap} />;
   }
   
   if (opportunitiesResult && selectedRole) {
@@ -761,7 +765,7 @@ export default function MainPage() {
       <div className="container mx-auto text-center max-w-4xl">
         <h2 className="text-3xl font-headline font-bold mb-4">What is Career Compass?</h2>
         <p className="text-lg text-muted-foreground mb-8">
-          In a world of ever-evolving industries, finding the right career can be overwhelming. Career Compass is an AI-powered guide designed to demystify this process, providing clear, personalized, and actionable guidance to help you confidently pursue your dreams.
+          In a world of ever-evolving industries, finding the right career can be overwhelming. Career Compass is your trusted guide to navigating the complexities of modern career paths, providing clear, personalized, and actionable guidance to help you confidently pursue your dreams.
         </p>
         <Button asChild size="lg">
           <Link href="/about">

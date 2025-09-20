@@ -40,12 +40,13 @@ interface CareerRoadmapProps {
   };
   onReset: () => void;
   onViewOpportunities: () => void;
+  onBackToRoleSelection: () => void;
 }
 
 type Resource = CareerPathOutput['resources'][0];
 type Tool = CareerPathOutput['tools'][0];
 
-export function CareerRoadmap({ data, userInput, onReset, onViewOpportunities }: CareerRoadmapProps) {
+export function CareerRoadmap({ data, userInput, onReset, onViewOpportunities, onBackToRoleSelection }: CareerRoadmapProps) {
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   
   const allKnowledgeAreas = useMemo(() => {
@@ -120,9 +121,9 @@ export function CareerRoadmap({ data, userInput, onReset, onViewOpportunities }:
             <h1 className="text-4xl font-headline font-bold">Your Custom Roadmap</h1>
             <p className="text-muted-foreground">A custom guide for becoming a {userInput.desiredCareer}</p>
           </div>
-          <Button variant="outline" onClick={onReset}>
+          <Button variant="outline" onClick={onBackToRoleSelection}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Start Over
+            Back to Role Selection
           </Button>
         </header>
 
