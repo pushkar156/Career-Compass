@@ -121,7 +121,7 @@ export function InteractiveQuestionnaire({ isOpen, onOpenChange, onSubmit }: { i
       ...defaultValuesForStep,
       ...existingDataForStep,
     });
-  }, [currentStep, methods, formData]);
+  }, [currentStep, methods, formData, isOpen]);
 
 
   const processAndGoNext = async () => {
