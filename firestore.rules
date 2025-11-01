@@ -13,24 +13,15 @@ service cloud.firestore {
       allow read, write: if isOwner(userId);
     }
 
-    // This rule allows a user to query their own history collection.
-    match /users/{userId}/history {
-      allow list: if isOwner(userId);
-    }
-    
-    // This rule allows a user to read, write, and create individual history documents.
-    match /users/{userId}/history/{historyId} {
-      allow read, write, create: if isOwner(userId);
+    // This single rule allows an authenticated user to perform all necessary actions 
+    // on their own history subcollection and the documents within it.
+    match /users/{userId}/history/{historyId=**} {
+      allow list, read, write, create: if isOwner(userId);
     }
 
     // Users can only manage metadata for their own files.
     match /users/{userId}/files/{fileId} {
       allow read, write: if isOwner(userId);
-    }
-
-    // Deny all other access by default
-    match /{document=**} {
-      allow read, write: if false;
     }
   }
 }
