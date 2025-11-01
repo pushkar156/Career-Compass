@@ -1,0 +1,122 @@
+{
+  "$schema": "https://firebase.google.com/docs/studio/backend-schema.json",
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Represents a user's profile information.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "currentGoal": {
+          "type": "string",
+          "description": "The user's current primary career goal."
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "A list of the user's skills."
+        }
+      },
+      "required": ["name", "email"]
+    },
+    "Roadmap": {
+      "title": "Career Roadmap",
+      "description": "A generated career roadmap.",
+      "type": "object",
+      "properties": {
+        "career": {
+          "type": "string",
+          "description": "The career goal for this roadmap."
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The steps in the roadmap."
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the roadmap was generated."
+        }
+      }
+    },
+    "HistoryItem": {
+      "title": "History Item",
+      "description": "A single entry in the user's generation history.",
+      "type": "object",
+      "properties": {
+        "generatedCareer": {
+          "type": "string",
+          "description": "The career goal for which the roadmap was generated."
+        },
+        "roadmapDetails": {
+          "type": "object",
+          "description": "The detailed roadmap content."
+        },
+        "aiPrompt": {
+          "type": "string",
+          "description": "The AI prompt used for generation."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of when the history item was created."
+        }
+      },
+      "required": ["generatedCareer", "timestamp"]
+    },
+    "FileMetadata": {
+      "title": "File Metadata",
+      "description": "Metadata for a user-uploaded file.",
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "fileSize": {
+          "type": "number"
+        },
+        "uploadedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["filename", "fileSize", "uploadedAt"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com", "password"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "User profile documents, keyed by user ID."
+    },
+    "/users/{userId}/history/{historyId}": {
+      "schema": {
+        "$ref": "#/entities/HistoryItem"
+      },
+      "description": "Subcollection for a user's generated roadmap history."
+    },
+    "/users/{userId}/files/{fileId}": {
+      "schema": {
+        "$ref": "#/entities/FileMetadata"
+      },
+      "description": "Metadata for files uploaded by the user."
+    }
+  }
+}
