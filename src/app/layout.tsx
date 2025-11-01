@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
-import { AuthProvider } from '@/hooks/use-auth';
 import { ThemeProvider } from '@/components/theme-provider';
 import Header from '@/components/header';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
@@ -34,14 +33,12 @@ export default function RootLayout({
             disableTransitionOnChange
         >
           <FirebaseClientProvider>
-            <AuthProvider>
               <div className="flex flex-col min-h-screen">
                 <Header />
                 <main className="flex-1">
                   {children}
                 </main>
               </div>
-            </AuthProvider>
           </FirebaseClientProvider>
           <Toaster />
         </ThemeProvider>
