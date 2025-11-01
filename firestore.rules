@@ -12,9 +12,9 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if isOwner(userId);
 
-      // Users can read, create, and write their own history documents.
+      // Users can read, list, create, and write their own history documents.
       match /history/{historyId} {
-        allow read, write: if isOwner(userId);
+        allow list, read, write: if isOwner(userId);
       }
 
       // Users can only manage metadata for their own files.
