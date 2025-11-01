@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { useFirestore } from '@/firebase';
+import { useFirebaseFirestore } from '@/firebase';
 import { collection, query, onSnapshot, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
 import type { CareerPathOutput } from '@/ai/flows/career-path-generator';
 
@@ -16,7 +16,7 @@ export interface HistoryItem {
 
 export function useHistory() {
   const { user } = useAuth();
-  const firestore = useFirestore();
+  const firestore = useFirebaseFirestore();
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
