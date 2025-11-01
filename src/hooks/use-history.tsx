@@ -5,6 +5,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { useFirebaseFirestore } from '@/firebase';
 import { collection, query, onSnapshot, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
 import type { CareerPathOutput } from '@/ai/flows/career-path-generator';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
 
 export interface HistoryItem {
   id: string;
@@ -14,8 +16,6 @@ export interface HistoryItem {
   timestamp: Date;
 }
 
-// The data that will be saved to Firestore.
-// The 'id' and 'timestamp' are generated on save.
 export type HistoryItemForSaving = Omit<HistoryItem, 'id' | 'timestamp'>;
 
 
@@ -46,8 +46,12 @@ export function useHistory() {
       setLoading(false);
       setError(null);
     }, (err) => {
-      console.error("Error fetching history:", err);
-      setError('Failed to fetch history. Please check your connection and security rules.');
+      const permissionError = new FirestorePermissionError({
+          path: historyCollectionRef.path,
+          operation: 'list',
+      });
+      errorEmitter.emit('permission-error', permissionError);
+      setError('Failed to fetch history. Check security rules.');
       setLoading(false);
     });
 
@@ -59,10 +63,21 @@ export function useHistory() {
       throw new Error('User is not authenticated or Firestore is not available.');
     }
     const historyCollectionRef = collection(firestore, 'users', user.uid, 'history');
-    await addDoc(historyCollectionRef, {
+    
+    // Do not await. Chain a .catch() to handle permission errors.
+    addDoc(historyCollectionRef, {
       ...item,
       timestamp: serverTimestamp(),
+    }).catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+            path: historyCollectionRef.path,
+            operation: 'create',
+            requestResourceData: item,
+        } satisfies SecurityRuleContext);
+        
+        errorEmitter.emit('permission-error', permissionError);
     });
+
   }, [user, firestore]);
 
   return { history, loading, error, addHistoryItem };
