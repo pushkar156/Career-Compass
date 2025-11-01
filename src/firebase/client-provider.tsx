@@ -20,7 +20,9 @@ import { useRouter } from 'next/navigation';
 
 import { firebaseConfig } from '@/firebase/config';
 import { FirebaseProvider, type FirebaseContextType } from '@/firebase/provider';
-import { AuthContext, type AuthContextType } from '@/hooks/use-auth'; // Import AuthContext
+import { AuthContext, type AuthContextType } from '@/hooks/use-auth';
+import { ThemeProvider } from '@/components/theme-provider';
+import Header from '@/components/header';
 
 type FirebaseClientProviderProps = {
   children: ReactNode;
@@ -109,7 +111,19 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
   return (
     <FirebaseProvider {...firebase}>
         <AuthContext.Provider value={authContextValue}>
-            {children}
+            <ThemeProvider
+                attribute="class"
+                defaultTheme="dark"
+                enableSystem
+                disableTransitionOnChange
+            >
+              <div className="flex flex-col min-h-screen">
+                <Header />
+                <main className="flex-1">
+                  {children}
+                </main>
+              </div>
+            </ThemeProvider>
         </AuthContext.Provider>
     </FirebaseProvider>
   );
