@@ -8,19 +8,19 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    // Users can only read and write their own documents.
+    // Users can only read and write their own profile document.
     match /users/{userId} {
       allow read, write: if isOwner(userId);
+    }
 
-      // Users can read, list, create, and write their own history documents.
-      match /history/{historyId} {
-        allow list, read, write: if isOwner(userId);
-      }
+    // Users can fully manage their own history subcollection.
+    match /users/{userId}/history/{historyId} {
+      allow list, read, write, create: if isOwner(userId);
+    }
 
-      // Users can only manage metadata for their own files.
-      match /files/{fileId} {
-        allow read, write: if isOwner(userId);
-      }
+    // Users can only manage metadata for their own files.
+    match /users/{userId}/files/{fileId} {
+      allow read, write: if isOwner(userId);
     }
 
     // Deny all other access by default
