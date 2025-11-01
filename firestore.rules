@@ -8,16 +8,15 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    // Users can only read and write their own profile document.
+    // Rule for the user's main profile document
     match /users/{userId} {
       allow read, write: if isOwner(userId);
+    }
 
-      // This single rule allows an authenticated user to perform all necessary actions
-      // on their own history subcollection and the documents within it.
-      // A user must be able to read their own profile to access subcollections.
-      match /history/{historyId} {
-        allow list, read, write, create: if isOwner(userId);
-      }
+    // Separate, explicit rule for the history subcollection
+    // This allows a user to query (list) and modify documents in their own history.
+    match /users/{userId}/history/{historyId} {
+      allow list, read, write, create: if isOwner(userId);
     }
 
     // Users can only manage metadata for their own files.
