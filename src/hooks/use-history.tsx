@@ -14,6 +14,11 @@ export interface HistoryItem {
   timestamp: Date;
 }
 
+// The data that will be saved to Firestore.
+// The 'id' and 'timestamp' are generated on save.
+export type HistoryItemForSaving = Omit<HistoryItem, 'id' | 'timestamp'>;
+
+
 export function useHistory() {
   const { user } = useAuth();
   const firestore = useFirebaseFirestore();
@@ -23,6 +28,7 @@ export function useHistory() {
 
   useEffect(() => {
     if (!user || !firestore) {
+      setHistory([]);
       setLoading(false);
       return;
     }
@@ -38,6 +44,7 @@ export function useHistory() {
       } as HistoryItem));
       setHistory(historyData);
       setLoading(false);
+      setError(null);
     }, (err) => {
       console.error("Error fetching history:", err);
       setError('Failed to fetch history. Please check your connection and security rules.');
@@ -47,7 +54,7 @@ export function useHistory() {
     return () => unsubscribe();
   }, [user, firestore]);
 
-  const addHistoryItem = useCallback(async (item: Omit<HistoryItem, 'id' | 'timestamp'>) => {
+  const addHistoryItem = useCallback(async (item: HistoryItemForSaving) => {
     if (!user || !firestore) {
       throw new Error('User is not authenticated or Firestore is not available.');
     }

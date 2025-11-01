@@ -29,7 +29,12 @@ import {
   Lightbulb,
   CheckCircle,
   TrendingUp,
+  History,
+  Loader2,
 } from 'lucide-react';
+import { useHistory, type HistoryItemForSaving } from '@/hooks/use-history';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 
 interface CareerRoadmapProps {
   data: CareerPathOutput;
@@ -48,6 +53,10 @@ type Tool = CareerPathOutput['tools'][0];
 
 export function CareerRoadmap({ data, userInput, onReset, onViewOpportunities, onBackToRoleSelection }: CareerRoadmapProps) {
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
+  const { user } = useAuth();
+  const { addHistoryItem } = useHistory();
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
   
   const allKnowledgeAreas = useMemo(() => {
     const beginner = data.knowledgeAreas?.beginnerToIntermediate || [];
@@ -60,6 +69,40 @@ export function CareerRoadmap({ data, userInput, onReset, onViewOpportunities, o
     setCompletedTasks((prev) =>
       prev.includes(task) ? prev.filter((t) => t !== task) : [...prev, task]
     );
+  };
+
+  const handleSaveToHistory = async () => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Not Logged In',
+        description: 'You need to be logged in to save your history.',
+      });
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const historyItem: HistoryItemForSaving = {
+        generatedCareer: userInput.desiredCareer,
+        roadmapDetails: data,
+        aiPrompt: `Career: ${userInput.desiredCareer}, Role: ${userInput.currentRole}, Interests: ${userInput.interests}`
+      };
+      await addHistoryItem(historyItem);
+      toast({
+        title: 'Saved to History',
+        description: `Your roadmap for "${userInput.desiredCareer}" has been saved.`,
+      });
+    } catch (error: any) {
+      console.error('Failed to save history:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Save Failed',
+        description: error.message || 'Could not save the roadmap. Please try again.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const progress = allKnowledgeAreas.length > 0 ? (completedTasks.length / allKnowledgeAreas.length) * 100 : 0;
@@ -163,6 +206,14 @@ export function CareerRoadmap({ data, userInput, onReset, onViewOpportunities, o
                    <Button onClick={onViewOpportunities} variant="secondary" className="w-full mt-4">
                         <TrendingUp className="mr-2 h-4 w-4" />
                         View Market Insights
+                    </Button>
+                     <Button onClick={handleSaveToHistory} disabled={isSaving || !user} className="w-full mt-2">
+                        {isSaving ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <History className="mr-2 h-4 w-4" />
+                        )}
+                        Save to History
                     </Button>
                 </CardContent>
               </Card>
