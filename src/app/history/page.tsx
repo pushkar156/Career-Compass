@@ -1,41 +1,20 @@
-
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
+import { useHistory } from '@/hooks/use-history';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { History, Clock, ArrowRight, User, Search } from 'lucide-react';
+import { History, Clock, ArrowRight, User, Search, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HistoryPage() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { history, loading: historyLoading, error } = useHistory();
 
-  // This is placeholder data. In the future, this would be fetched from a database.
-  const userHistory: { id: string; career: string; date: string; progress: number }[] = [
-    // {
-    //   id: '1',
-    //   career: 'Software Engineer',
-    //   date: '2024-07-28',
-    //   progress: 75,
-    // },
-    // {
-    //   id: '2',
-    //   career: 'UX Designer',
-    //   date: '2024-07-25',
-    //   progress: 40,
-    // },
-    // {
-    //   id: '3',
-    //   career: 'Data Scientist',
-    //   date: '2024-07-22',
-    //   progress: 90,
-    // },
-  ];
-
-  if (loading) {
+  if (authLoading || historyLoading) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
-        <p>Loading...</p>
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
   }
@@ -63,6 +42,19 @@ export default function HistoryPage() {
     );
   }
 
+  if (error) {
+    return (
+        <div className="min-h-[calc(100vh-10rem)] flex items-center justify-center p-4">
+            <Card className="max-w-md w-full text-center border-destructive">
+                <CardHeader>
+                    <CardTitle className="font-headline text-2xl text-destructive">Error</CardTitle>
+                    <CardDescription>{error}</CardDescription>
+                </CardHeader>
+            </Card>
+        </div>
+    );
+  }
+
   return (
     <div className="min-h-screen p-4 sm:p-6 md:p-10">
       <div className="max-w-5xl mx-auto">
@@ -76,7 +68,7 @@ export default function HistoryPage() {
           </p>
         </header>
 
-        {userHistory.length === 0 ? (
+        {history.length === 0 ? (
           <Card className="text-center p-8">
             <CardHeader>
                 <div className="mx-auto bg-primary/10 text-primary p-3 rounded-full w-fit mb-4">
@@ -93,21 +85,17 @@ export default function HistoryPage() {
           </Card>
         ) : (
           <main className="space-y-6">
-            {userHistory.map((item) => (
+            {history.map((item) => (
               <Card key={item.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6 flex items-center justify-between">
                   <div>
-                    <h3 className="font-headline text-2xl font-semibold text-primary">{item.career}</h3>
+                    <h3 className="font-headline text-2xl font-semibold text-primary">{item.generatedCareer}</h3>
                     <div className="flex items-center gap-2 text-muted-foreground text-sm mt-2">
                       <Clock size={16} />
-                      <span>Explored on {new Date(item.date).toLocaleDateString()}</span>
+                      <span>Explored on {new Date(item.timestamp).toLocaleDateString()}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                     <div className="text-right">
-                        <p className="font-bold text-lg">{item.progress}%</p>
-                        <p className="text-xs text-muted-foreground">Complete</p>
-                    </div>
                     <Button variant="outline" size="icon" asChild>
                         {/* In a real app, this would link to the specific roadmap */}
                         <Link href="/"> 
